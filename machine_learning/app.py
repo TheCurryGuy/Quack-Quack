@@ -9,7 +9,6 @@ import pandas as pd
 from machine_learning.model2.main import allocate_rooms   
 from machine_learning.model3.main import get_predictions_csv_path_for, MODEL_PATH, train_model, predict_score_from_json
 from pydantic import BaseModel
-import joblib
 import tempfile
 
 
@@ -18,12 +17,6 @@ app = FastAPI(title="Machine Learning Models API")
 BASE_DIR = os.path.dirname(__file__)
 OUTPUT_DIR = os.path.join(BASE_DIR, "output")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-
-# --- Pydantic Models ---
-class TeamInput(BaseModel):
-    team_name: str
-    tech_stack_used: str
 
 
 @app.get("/")
@@ -88,6 +81,11 @@ async def upload_and_run_model3(file: UploadFile = File(...)):
 
 
 # --- Model 3 JSON Endpoint ---
+
+class TeamInput(BaseModel):
+    team_name: str
+    tech_stack_used: str
+    
 @app.post("/model3/predict")
 def predict_score(team_input: TeamInput):
     try:
@@ -96,7 +94,7 @@ def predict_score(team_input: TeamInput):
             "tech_stack_used": team_input.tech_stack_used
         }
         predicted_score = predict_score_from_json(json_input)
-        return  predicted_score
+        return {'predicted_score':predicted_score}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
