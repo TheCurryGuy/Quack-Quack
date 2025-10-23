@@ -37,31 +37,16 @@ def train_model():
     print(f"✅ Model saved at {MODEL_PATH}")
 
 
-def predict_scores():
-    print(" Loading model and new data...")
+def _prepare_and_predict(X_pred):
+    print(" Loading model...")
     loaded = joblib.load(MODEL_PATH)
 
-   
     if isinstance(loaded, dict) and "model" in loaded:
         model = loaded["model"]
         feature_names = loaded.get("feature_names")
     else:
         model = loaded
         feature_names = None
-
-    new_data_original = pd.read_csv(NEW_DATA_PATH)
-
-    lower_map_new = {c.lower(): c for c in new_data_original.columns}
-
-    team_name_key = (
-        lower_map_new.get("team name")
-        or lower_map_new.get("team_name")
-        or lower_map_new.get("team")
-    )
-    team_series = new_data_original[team_name_key].copy() if team_name_key else None
-
-    X_pred = new_data_original.copy()
-
 
     if feature_names is not None:
         for col in feature_names:
@@ -83,6 +68,26 @@ def predict_scores():
         predictions = np.rint(predictions).astype(int)
     except Exception:
         predictions = pd.Series(predictions).round(0).astype(int).values
+
+    return model, predictions
+
+
+def predict_scores():
+    print(" Loading model and new data...")
+    new_data_original = pd.read_csv(NEW_DATA_PATH)
+
+    lower_map_new = {c.lower(): c for c in new_data_original.columns}
+
+    team_name_key = (
+        lower_map_new.get("team name")
+        or lower_map_new.get("team_name")
+        or lower_map_new.get("team")
+    )
+    team_series = new_data_original[team_name_key].copy() if team_name_key else None
+
+    X_pred = new_data_original.copy()
+
+    model, predictions = _prepare_and_predict(X_pred)
 
     if team_series is not None:
         team_name = team_series.astype(str)
@@ -124,9 +129,53 @@ def get_predictions_csv_path_for(input_csv_path: str):
         NEW_DATA_PATH = original_input
 
 
+def predict_score_from_json(json_input: dict) -> int:
+    if not os.path.exists(MODEL_PATH):
+        train_model()
+   
+    tech_stack = json_input.get("tech_stack_used", "")
+    
+    loaded = joblib.load(MODEL_PATH)
+    if isinstance(loaded, dict) and "model" in loaded:
+        feature_names = loaded.get("feature_names")
+    else:
+        feature_names = getattr(loaded, "feature_names_in_", None)
+        if feature_names is not None:
+            feature_names = list(map(str, feature_names))
+    
+    if feature_names and "Score" in feature_names:
+        feature_names = [f for f in feature_names if f != "Score"]
+    
+    tech_input = {tech: 0 for tech in feature_names}
+    
+    techs = tech_stack.split()
+    for tech in techs:
+        for feature in feature_names:
+            if tech.lower() in feature.lower() or feature.lower() in tech.lower():
+                tech_input[feature] = 1
+                break
+    
+    X_pred = pd.DataFrame([tech_input])[feature_names]
+   
+    model, predictions = _prepare_and_predict(X_pred)
+    
+    return int(predictions[0])
+
+
+
 if __name__ == "__main__":
     if not os.path.exists(MODEL_PATH):
         train_model()
     predict_scores()
-
-
+    
+    json_input1 = {
+        "team_name": "Tech_Titans",
+        "tech_stack_used": "MongoDB  React  javascript  Express.js  TailwindCss  Redux  Socket.io  AWS"
+    }
+    json_input2 = {
+        "team_name": "Tech_Titans",
+        "tech_stack_used": "Next.js  Azure  Python  MongoDB  aws  OpenCV  Prisma  TailwindCss  Recoil  Zustand  Redux  TanStack_Query"
+    }
+    score = predict_score_from_json(json_input2)
+    print(f"Predicted score from JSON input: {score}")
+    
