@@ -1,25 +1,30 @@
 // apps/participant-client/app/layout.tsx
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+//@ts-ignore
 import "./globals.css";
+import AuthProvider from "@/components/AuthProvider"; // <-- Import
+import Navbar from "@/components/Navbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "HackVerse - Join a Hackathon",
-  description: "Discover and participate in exciting hackathons.",
+  title: "HackVerse",
+  description: "Join and compete in the next big hackathon.",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        {/* We will add a Header/Navbar component here later */}
-        {children}
+        <AuthProvider>
+          <Navbar />
+          {children}
+        </AuthProvider> {/* <-- Wrap here */}
       </body>
     </html>
   );
