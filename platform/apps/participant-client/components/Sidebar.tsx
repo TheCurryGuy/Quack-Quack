@@ -7,10 +7,9 @@ import { Compass, ListChecks, User } from 'lucide-react';
 
 const navItems = [
     { name: 'Explore', href: '/dashboard', icon: Compass },
-    { name: 'My Registrations', href: '/dashboard/registrations', icon: ListChecks },
+    { name: 'My Hackathons', href: '/dashboard/my-hackathons', icon: ListChecks }, // <-- UPDATED
     { name: 'My Profile', href: '/dashboard/profile', icon: User },
 ];
-
 export default function Sidebar() {
     const pathname = usePathname();
 
