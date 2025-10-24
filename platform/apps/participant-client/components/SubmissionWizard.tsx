@@ -92,7 +92,7 @@ export default function SubmissionWizard({ hackathonId, open, onOpenChange, onSu
                     {step === 1 && (
                         <>
                             <Input placeholder="Project Name" value={projectName} onChange={e => setProjectName(e.target.value)} />
-                            <div className="border rounded-md min-h-[40px] p-2 flex flex-wrap gap-2">
+                            <div className="border rounded-md min-h-10 p-2 flex flex-wrap gap-2">
                                 {techs.map(t => <Badge key={t} variant="secondary">{t}<X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => setTechs(techs.filter(s => s !== t))} /></Badge>)}
                             </div>
                             <Popover open={popoverOpen} onOpenChange={setPopoverOpen}><PopoverTrigger asChild><Button variant="outline" className="w-full justify-between">Select technologies...<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" /></Button></PopoverTrigger><PopoverContent className="w-[375px] p-0"><Command><CommandInput placeholder="Search tech..." /><CommandEmpty>No tech found.</CommandEmpty><CommandGroup>{ALL_TECHS.filter(t => !techs.includes(t)).map(t => (<CommandItem key={t} value={t} onSelect={() => {setTechs([...techs, t]); setPopoverOpen(false);}}>{t}</CommandItem>))}</CommandGroup></Command></PopoverContent></Popover>

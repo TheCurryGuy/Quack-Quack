@@ -78,7 +78,7 @@ export default function Step1Skills({ onNext }: { onNext: (data: any, scoreData:
             <div className="space-y-2">
                  <label className="text-sm font-medium">Your Skills</label>
                  {/* Area to display selected skills as badges */}
-                 <div className="border rounded-md min-h-[40px] p-2 flex flex-wrap gap-2">
+                 <div className="border rounded-md min-h-10 p-2 flex flex-wrap gap-2">
                     {selectedSkills.map(skill => (
                         <Badge key={skill} variant="secondary">
                             {skill}

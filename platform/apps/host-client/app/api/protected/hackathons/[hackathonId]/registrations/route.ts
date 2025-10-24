@@ -9,7 +9,7 @@ interface HostJWTPayload {
   hostId: string;
 }
 
-// GET Handler to fetch all PENDING registrations for a specific hackathon
+// The new, rewritten GET handler
 export async function GET(req: NextRequest, { params }: { params: { hackathonId: string } }): Promise<NextResponse> {
   const authHeader = req.headers.get('authorization');
   const token = authHeader?.split(' ')[1];
@@ -20,7 +20,7 @@ export async function GET(req: NextRequest, { params }: { params: { hackathonId:
     const hostId = (payload as unknown as HostJWTPayload).hostId;
     const { hackathonId } = params;
 
-    // First, verify the host owns the hackathon
+    // First, a security check to ensure the host owns this hackathon before proceeding.
     const hackathon = await prismaClient.hackathon.findFirst({
         where: { id: hackathonId, hostId: hostId }
     });
@@ -28,26 +28,47 @@ export async function GET(req: NextRequest, { params }: { params: { hackathonId:
         return NextResponse.json({ message: 'Hackathon not found or access denied' }, { status: 404 });
     }
 
-    // Fetch all pending registrations and include participant details
-    const pendingRegistrations = await prismaClient.registration.findMany({
+    // --- NEW LOGIC: Perform two separate queries for each registration type ---
+
+    // 1. Fetch all PENDING individual applications for this hackathon
+    const individualApps = await prismaClient.individualRegistration.findMany({
       where: {
         hackathonId: hackathonId,
         status: 'PENDING',
       },
+      // Include all the data the host needs to make a decision
       include: {
-        participants: { // Get the details of each person in the registration
-          include: {
-            user: true, // And get their user profile (name, email)
-          },
-        },
+        user: { // Get the user's basic info
+          select: {
+            name: true,
+            email: true,
+            image: true,
+          }
+        }
       },
+      orderBy: {
+          createdAt: 'asc'
+      }
     });
 
-    // Separate into teams and individuals for easier frontend rendering
-    const teams = pendingRegistrations.filter(reg => reg.teamName !== null);
-    const individuals = pendingRegistrations.filter(reg => reg.teamName === null);
+    // 2. Fetch all PENDING team applications for this hackathon
+    const teamApps = await prismaClient.teamRegistration.findMany({
+        where: {
+            hackathonId: hackathonId,
+            status: 'PENDING',
+        },
+        // This is a deep query to get all the pre-filled member details
+        include: {
+            pendingMembers: true // Get the details of each person in the application
+        },
+        orderBy: {
+            createdAt: 'asc'
+        }
+    });
 
-    return NextResponse.json({ teams, individuals }, { status: 200 });
+    // 3. Return the data in a clean, structured format for the frontend
+    return NextResponse.json({ individualApps, teamApps }, { status: 200 });
+
   } catch (error) {
     console.error('Error fetching registrations:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });

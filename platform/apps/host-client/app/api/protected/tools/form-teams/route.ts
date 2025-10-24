@@ -1,40 +1,60 @@
 // apps/host-client/app/api/protected/tools/form-teams/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
-import Papa from 'papaparse';
+import { jwtVerify } from 'jose';
+
+const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
 export async function POST(req: NextRequest) {
+    // Security Check: Verify the host is logged in before proceeding.
+    const authHeader = req.headers.get('authorization');
+    const token = authHeader?.split(' ')[1];
+    if (!token) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    try {
+        await jwtVerify(token, secret);
+    } catch (err) {
+        return NextResponse.json({ message: 'Invalid token' }, { status: 401 });
+    }
+
     try {
         const formData = await req.formData();
         const file = formData.get('file') as File;
 
         if (!file) {
-            return NextResponse.json({ message: 'No file uploaded.' }, { status: 400 });
+            return NextResponse.json({ message: 'No CSV file was uploaded.' }, { status: 400 });
         }
 
-        // We receive the file from our client, now we'll forward it to the external AI service
+        // We are acting as a secure proxy. We re-package the file into new form data
+        // to send to your external service. This hides the external URL and any API keys.
         const externalApiFormData = new FormData();
         externalApiFormData.append('file', file);
         
-        // --- IMPORTANT: REPLACE WITH YOUR ACTUAL AI MODEL'S API ENDPOINT ---
-        const externalApiUrl = 'https://your-ai-model-api.com/form-teams';
+        // --- IMPORTANT: REPLACE WITH YOUR TEAM FORMATION AI'S API ENDPOINT ---
+        const externalApiUrl = 'https://your-ai-model-api.com/form-teams-by-id';
         // ---
 
         const responseFromAi = await axios.post(externalApiUrl, externalApiFormData, {
             headers: {
-                // Add any necessary headers for your AI service, e.g., an API key
-                // 'Authorization': `Bearer ${process.env.AI_MODEL_API_KEY}`,
+                // Add any secret API key your service might need. Store it in .env!
+                // 'X-API-Key': process.env.YOUR_AI_SERVICE_API_KEY,
                 'Content-Type': 'multipart/form-data',
             },
-            // The response should be the raw CSV content
+            // Crucially, we expect the raw CSV text as the response
             responseType: 'text' 
         });
 
-        // The AI service should return a CSV string. We will wrap it in JSON for our client.
-        return NextResponse.json({ teamsCsv: responseFromAi.data }, { status: 200 });
+        // The AI service returns a CSV string. We will send this back to the client.
+        // The client will then trigger the download.
+        return new NextResponse(responseFromAi.data, {
+            status: 200,
+            headers: {
+                'Content-Type': 'text/csv',
+                'Content-Disposition': 'attachment; filename="formed-teams-by-id.csv"',
+            },
+        });
 
     } catch (error: any) {
-        console.error('Error in form-teams API:', error.response?.data || error.message);
-        return NextResponse.json({ message: 'Error communicating with the AI service.' }, { status: 502 }); // 502 Bad Gateway
+        console.error('Error in form-teams API bridge:', error.response?.data || error.message);
+        return NextResponse.json({ message: 'An error occurred while communicating with the AI service.' }, { status: 502 });
     }
 }

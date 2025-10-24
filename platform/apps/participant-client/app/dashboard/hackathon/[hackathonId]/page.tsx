@@ -18,7 +18,9 @@ import WinnersCard from '@/components/WinnersCard';
 
 interface StatusData {
     registrationStatus: 'PENDING' | 'APPROVED' | 'REJECTED' | null;
-    teamDetails: { name: string; members: any[] } | null;
+    teamDetails: {
+        id: string; name: string; bio: string | null; skills: string | null; members: any[]
+    } | null;
     submissionDetails: { id: string; title: string; aiScore: number; about: string; problem: string; } | null; // <-- THIS LINE IS ADDED/FIXED
 }
 interface HackathonData {
@@ -86,7 +88,7 @@ export default function ParticipantHackathonPage() {
                     <StatusCard status={statusData?.registrationStatus || null} />
                     
                     {/* Conditionally render the team card */}
-                    {statusData?.teamDetails && <MyTeamCard team={statusData.teamDetails} />}
+                    {statusData?.teamDetails && <MyTeamCard team={statusData.teamDetails} onTeamUpdate={fetchMyStatus} />}
                     
                     {/* Placeholders for future components */}
                     <SubmissionCard hackathonId={hackathonId as string} hackathonStatus={hackathon.status} submission={statusData?.submissionDetails || null} onSubmissionSuccess={fetchMyStatus}/>

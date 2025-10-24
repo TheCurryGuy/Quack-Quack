@@ -5,7 +5,7 @@ import { jwtVerify } from 'jose'; // A modern, robust library for JWT verificati
 const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
 export async function middleware(req: NextRequest) {
-  const authHeader = req.headers.get('authorization');
+  const authHeader = req.headers.get('Authorization');
   const token = authHeader?.split(' ')[1];
 
   if (!token) {

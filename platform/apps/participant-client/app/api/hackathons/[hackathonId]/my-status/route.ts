@@ -50,7 +50,10 @@ export async function GET(req: NextRequest, { params }: { params: { hackathonId:
             });
             if (finalTeam) {
                 teamDetails = {
+                    id: finalTeam.id,
                     name: finalTeam.name,
+                    bio: finalTeam.bio,
+                    skills: finalTeam.skills,
                     members: finalTeam.members.map(m => m.user)
                 };
                 if (finalTeam.submission){
