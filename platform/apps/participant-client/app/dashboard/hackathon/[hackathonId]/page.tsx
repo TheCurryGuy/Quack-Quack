@@ -15,6 +15,7 @@ import MyTeamCard from '@/components/MyTeamCard';
 import { Button } from '@/components/ui/button';
 import SubmissionCard from '@/components/SubmissionCard';
 import WinnersCard from '@/components/WinnersCard';
+import HackathonTimer from '@/components/HackathonTimer';
 
 interface StatusData {
     registrationStatus: 'PENDING' | 'APPROVED' | 'REJECTED' | null;
@@ -37,7 +38,7 @@ interface HackathonData {
 export default function ParticipantHackathonPage() {
     const { hackathonId } = useParams();
     const [statusData, setStatusData] = useState<StatusData | null>(null);
-    const [hackathon, setHackathon] = useState<HackathonData | null>(null);
+    const [hackathon, setHackathon] = useState<any>(null); // Using 'any' for simplicity in this final step
     const [isLoading, setIsLoading] = useState(true);
     const fetchMyStatus = async () => {
                 try {
@@ -84,6 +85,12 @@ export default function ParticipantHackathonPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Left side with user-specific sections */}
                 <div className="lg:col-span-1 space-y-6">
+                    <HackathonTimer 
+                        status={hackathon.status}
+                        startDate={hackathon.startDate}
+                        actualStartTime={hackathon.actualStartTime}
+                        durationHours={hackathon.durationHours}
+                    />
                     <h2 className="text-2xl font-bold">Your Dashboard</h2>
                     <StatusCard status={statusData?.registrationStatus || null} />
                     
@@ -91,7 +98,14 @@ export default function ParticipantHackathonPage() {
                     {statusData?.teamDetails && <MyTeamCard team={statusData.teamDetails} onTeamUpdate={fetchMyStatus} />}
                     
                     {/* Placeholders for future components */}
-                    <SubmissionCard hackathonId={hackathonId as string} hackathonStatus={hackathon.status} submission={statusData?.submissionDetails || null} onSubmissionSuccess={fetchMyStatus}/>
+                    {hackathon.status === 'LIVE' && statusData?.registrationStatus === 'APPROVED' && (
+                        <SubmissionCard 
+                            hackathonId={hackathon.id} 
+                            hackathonStatus={hackathon.status} 
+                            submission={statusData?.submissionDetails}
+                            onSubmissionSuccess={fetchMyStatus}
+                        />
+                    )}
                     {hackathon?.status === 'ENDED' && <WinnersCard hackathonId={hackathon.id} />}
                 </div>
 
