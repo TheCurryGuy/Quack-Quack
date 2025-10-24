@@ -9,8 +9,16 @@ import ReactMarkdown from 'react-markdown';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, Clock, Users, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
+import StatusCard from '@/components/StatusCard';
+import MyTeamCard from '@/components/MyTeamCard';
+
 import { Button } from '@/components/ui/button';
 
+
+interface StatusData {
+    registrationStatus: 'PENDING' | 'APPROVED' | 'REJECTED' | null;
+    teamDetails: { name: string; members: any[] } | null;
+}
 interface HackathonData {
     id: string;
     name: string;
@@ -23,6 +31,7 @@ interface HackathonData {
 
 export default function ParticipantHackathonPage() {
     const { hackathonId } = useParams();
+    const [statusData, setStatusData] = useState<StatusData | null>(null);
     const [hackathon, setHackathon] = useState<HackathonData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -40,6 +49,15 @@ export default function ParticipantHackathonPage() {
                 }
             };
             fetchHackathon();
+            const fetchMyStatus = async () => {
+                try {
+                    const response = await axios.get(`/api/hackathons/${hackathonId}/my-status`);
+                    setStatusData(response.data);
+                } catch (error) {
+                    console.log("User may not be registered yet.");
+                }
+            };
+            fetchMyStatus();
         }
     }, [hackathonId]);
 
@@ -61,15 +79,13 @@ export default function ParticipantHackathonPage() {
                 {/* Left side with user-specific sections */}
                 <div className="lg:col-span-1 space-y-6">
                     <h2 className="text-2xl font-bold">Your Dashboard</h2>
-                    {/* 
-                        THIS IS WHERE THE NEW SECTIONS WILL GO
-                        <StatusComponent hackathonId={hackathon.id} />
-                        <MyTeamComponent hackathonId={hackathon.id} />
-                        <SubmissionComponent hackathonId={hackathon.id} />
-                        <WinnersComponent hackathonId={hackathon.id} />
-                    */}
-                     <Card><CardContent className="pt-6">Status section coming soon...</CardContent></Card>
-                     <Card><CardContent className="pt-6">My Team section coming soon...</CardContent></Card>
+                    <StatusCard status={statusData?.registrationStatus || null} />
+                    
+                    {/* Conditionally render the team card */}
+                    {statusData?.teamDetails && <MyTeamCard team={statusData.teamDetails} />}
+                    
+                    {/* Placeholders for future components */}
+                    <Card><CardContent className="pt-6">Submission section coming soon...</CardContent></Card>
                 </div>
 
                 {/* Main Content with hackathon details */}
