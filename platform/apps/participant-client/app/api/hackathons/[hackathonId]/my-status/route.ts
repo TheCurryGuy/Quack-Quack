@@ -16,6 +16,7 @@ export async function GET(req: NextRequest, { params }: { params: { hackathonId:
     try {
         let registrationStatus: string | null = null;
         let teamDetails: any = null;
+        let submissionDetails: any = null;
 
         // Check for an individual registration
         const individualReg = await prismaClient.individualRegistration.findUnique({
@@ -43,7 +44,8 @@ export async function GET(req: NextRequest, { params }: { params: { hackathonId:
                     members: { some: { userId: userId } }
                 },
                 include: {
-                    members: { include: { user: { select: { name: true, image: true } } } }
+                    members: { include: { user: { select: { name: true, image: true } } } },
+                    submission: true
                 }
             });
             if (finalTeam) {
@@ -51,6 +53,9 @@ export async function GET(req: NextRequest, { params }: { params: { hackathonId:
                     name: finalTeam.name,
                     members: finalTeam.members.map(m => m.user)
                 };
+                if (finalTeam.submission){
+                    submissionDetails = finalTeam.submission;
+                }
             }
         }
 
@@ -58,7 +63,7 @@ export async function GET(req: NextRequest, { params }: { params: { hackathonId:
             return NextResponse.json({ message: 'User not registered for this hackathon.' }, { status: 404 });
         }
 
-        return NextResponse.json({ registrationStatus, teamDetails }, { status: 200 });
+        return NextResponse.json({ registrationStatus, teamDetails, submissionDetails }, { status: 200 });
 
     } catch (error) {
         console.error('Error fetching my-status:', error);

@@ -13,11 +13,13 @@ import StatusCard from '@/components/StatusCard';
 import MyTeamCard from '@/components/MyTeamCard';
 
 import { Button } from '@/components/ui/button';
-
+import SubmissionCard from '@/components/SubmissionCard';
+import WinnersCard from '@/components/WinnersCard';
 
 interface StatusData {
     registrationStatus: 'PENDING' | 'APPROVED' | 'REJECTED' | null;
     teamDetails: { name: string; members: any[] } | null;
+    submissionDetails: { id: string; title: string; aiScore: number; about: string; problem: string; } | null; // <-- THIS LINE IS ADDED/FIXED
 }
 interface HackathonData {
     id: string;
@@ -27,6 +29,7 @@ interface HackathonData {
     startDate: string;
     durationHours: number;
     teamSize: number;
+    status: string;
 }
 
 export default function ParticipantHackathonPage() {
@@ -34,6 +37,14 @@ export default function ParticipantHackathonPage() {
     const [statusData, setStatusData] = useState<StatusData | null>(null);
     const [hackathon, setHackathon] = useState<HackathonData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const fetchMyStatus = async () => {
+                try {
+                    const response = await axios.get(`/api/hackathons/${hackathonId}/my-status`);
+                    setStatusData(response.data);
+                } catch (error) {
+                    console.log("User may not be registered yet.");
+                }
+        };
 
     useEffect(() => {
         if (hackathonId) {
@@ -49,14 +60,7 @@ export default function ParticipantHackathonPage() {
                 }
             };
             fetchHackathon();
-            const fetchMyStatus = async () => {
-                try {
-                    const response = await axios.get(`/api/hackathons/${hackathonId}/my-status`);
-                    setStatusData(response.data);
-                } catch (error) {
-                    console.log("User may not be registered yet.");
-                }
-            };
+            
             fetchMyStatus();
         }
     }, [hackathonId]);
@@ -85,13 +89,14 @@ export default function ParticipantHackathonPage() {
                     {statusData?.teamDetails && <MyTeamCard team={statusData.teamDetails} />}
                     
                     {/* Placeholders for future components */}
-                    <Card><CardContent className="pt-6">Submission section coming soon...</CardContent></Card>
+                    <SubmissionCard hackathonId={hackathonId as string} hackathonStatus={hackathon.status} submission={statusData?.submissionDetails || null} onSubmissionSuccess={fetchMyStatus}/>
+                    {hackathon?.status === 'ENDED' && <WinnersCard hackathonId={hackathon.id} />}
                 </div>
 
                 {/* Main Content with hackathon details */}
                 <div className="lg:col-span-2">
-                     <Link href={`/hackathon/${hackathon.id}`} legacyBehavior>
-                        <a target="_blank" rel="noopener noreferrer"><Button variant="outline">View Public Page</Button></a>
+                     <Link href={`/hackathon/${hackathon.id}`} target="_blank" rel="noopener noreferrer">
+                        <Button variant="outline">View Public Page</Button>
                     </Link>
                     <h1 className="text-4xl font-extrabold tracking-tight mt-4 mb-4">{hackathon.name}</h1>
                     <article className="prose dark:prose-invert max-w-none">
