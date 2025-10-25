@@ -31,59 +31,39 @@ def home():
 
 # --- Model 1 Endpoint ---
 # -----------------------------
-# MODEL 1 ENDPOINTS
-# -----------------------------
-# --- Input Model ---
+
 class CandidateInput(BaseModel):
     name: str
     tech_stack_used: str
 
 
-# --- Endpoint 1: Evaluate Candidate (Only Score) ---
+# --- Endpoint 1: Evaluate Candidate ---
 @app.post("/model1/evaluate")
 def evaluate_candidate_api(data: CandidateInput):
-    """
-    Takes candidate name and tech stack string (skills separated by double spaces),
-    converts to a list, evaluates using model1.part1, and returns only the score.
-    """
+   
 
-    # Step 1️⃣ Convert double-space-separated skills to a list
     cleaned_stack = data.tech_stack_used.replace("  ", ",").replace(" ,", ",").strip()
     skills = [s.strip() for s in cleaned_stack.split(",") if s.strip()]
 
-    # Step 2️⃣ Evaluate candidate
     _, score, _ = evaluate_candidate(data.name, skills)
 
-    # Step 3️⃣ Return only the score in JSON
     return {"score": score}
 
-
-# ------------------------------------------------------------
-# 🔹 Function 2 (part2.py): Form Teams from CSV Input
-# ------------------------------------------------------------
-
+#Endpoint 2: Form Teams ---
 @app.post("/model1/form_teams", response_class=FileResponse)
 async def form_teams(file: UploadFile = File(...)):
-    """
-    Accepts a CSV file (output of evaluate_candidates),
-    forms teams using model1.part2, writes final teams.csv to disk,
-    and returns it for download.
-    """
+    
 
-    # Step 1️⃣ Read uploaded CSV content
     content = await file.read()
     csv_content = content.decode("utf-8")
 
-    # Step 2️⃣ Process the CSV with form_teams_from_csv()
     teams_csv = form_teams_from_csv(csv_content)
 
-    # Step 3️⃣ Save teams CSV to disk
     os.makedirs("outputs", exist_ok=True)
     file_path = "outputs/teams.csv"
     with open(file_path, "w", encoding="utf-8", newline="") as f:
         f.write(teams_csv)
 
-    # Step 4️⃣ Return generated CSV for download
     return FileResponse(
         path=file_path,
         filename="teams.csv",
