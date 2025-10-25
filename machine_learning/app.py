@@ -37,7 +37,7 @@ class CandidateInput(BaseModel):
     tech_stack_used: str
 
 
-# --- Endpoint 1: Evaluate Candidate ---
+## --- Endpoint 1: Evaluate Candidate ---
 @app.post("/model1/evaluate")
 def evaluate_candidate_api(data: CandidateInput):
    
@@ -49,7 +49,7 @@ def evaluate_candidate_api(data: CandidateInput):
 
     return {"score": score}
 
-#Endpoint 2: Form Teams ---
+## --- Endpoint 2: Form Teams ---
 @app.post("/model1/form_teams", response_class=FileResponse)
 async def form_teams(file: UploadFile = File(...)):
     
