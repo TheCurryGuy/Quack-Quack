@@ -1,13 +1,11 @@
 // apps/participant-client/app/dashboard/hackathon/[hackathonId]/page.tsx
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
-import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, Clock, Users, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import StatusCard from '@/components/StatusCard';
 import MyTeamCard from '@/components/MyTeamCard';
@@ -20,9 +18,9 @@ import HackathonTimer from '@/components/HackathonTimer';
 interface StatusData {
     registrationStatus: 'PENDING' | 'APPROVED' | 'REJECTED' | null;
     teamDetails: {
-        id: string; name: string; bio: string | null; skills: string | null; members: any[]
+        id: string; name: string; bio: string | null; skills: string | null; members: { name: string | null; image: string | null; }[]
     } | null;
-    submissionDetails: { id: string; title: string; aiScore: number; about: string; problem: string; } | null; // <-- THIS LINE IS ADDED/FIXED
+    submissionDetails: { id: string; title: string; aiScore: number; about: string; problem: string; } | null;
 }
 interface HackathonData {
     id: string;
@@ -32,22 +30,23 @@ interface HackathonData {
     startDate: string;
     durationHours: number;
     teamSize: number;
-    status: string;
+    status: "UPCOMING" | "LIVE" | "ENDED";
+    actualStartTime: string | null;
 }
 
 export default function ParticipantHackathonPage() {
     const { hackathonId } = useParams();
     const [statusData, setStatusData] = useState<StatusData | null>(null);
-    const [hackathon, setHackathon] = useState<any>(null); // Using 'any' for simplicity in this final step
+    const [hackathon, setHackathon] = useState<HackathonData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const fetchMyStatus = async () => {
-                try {
-                    const response = await axios.get(`/api/hackathons/${hackathonId}/my-status`);
-                    setStatusData(response.data);
-                } catch (error) {
-                    console.log("User may not be registered yet.");
-                }
-        };
+    const fetchMyStatus = useCallback(async () => {
+        try {
+            const response = await axios.get(`/api/hackathons/${hackathonId}/my-status`);
+            setStatusData(response.data);
+        } catch {
+            console.log("User may not be registered yet.");
+        }
+    }, [hackathonId]);
 
     useEffect(() => {
         if (hackathonId) {
@@ -56,8 +55,8 @@ export default function ParticipantHackathonPage() {
                 try {
                     const response = await axios.get(`/api/hackathons/${hackathonId}`);
                     setHackathon(response.data);
-                } catch (err) {
-                    console.error("Failed to load hackathon details");
+                } catch (_error) {
+                    console.error("Failed to load hackathon details", _error);
                 } finally {
                     setIsLoading(false);
                 }
@@ -66,7 +65,7 @@ export default function ParticipantHackathonPage() {
             
             fetchMyStatus();
         }
-    }, [hackathonId]);
+    }, [hackathonId, fetchMyStatus]);
 
     if (isLoading) {
         return <div>Loading your hackathon dashboard...</div>;

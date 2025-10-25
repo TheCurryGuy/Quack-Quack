@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 
 // This is the main handler for POST requests to /api/project-score
 export async function POST(req: NextRequest) {
@@ -48,9 +48,13 @@ export async function POST(req: NextRequest) {
         // We are assuming your API returns a body like: { "name": "...", "score": 95 }
         return NextResponse.json(responseFromAi.data, { status: 200 });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         // 7. Robust error handling
-        console.error('Error in project-score API bridge:', error.response?.data || error.message);
+        if (axios.isAxiosError(error)) {
+            console.error('Error in project-score API bridge:', error.response?.data || error.message);
+        } else {
+            console.error('An unexpected error occurred:', error);
+        }
         return NextResponse.json({ message: 'An error occurred while evaluating the project score.' }, { status: 502 }); // 502 Bad Gateway
     }
 }

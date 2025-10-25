@@ -56,7 +56,7 @@ export default function HackathonDetailPage() {
                 try {
                     const response = await axios.get(`/api/hackathons/${hackathonId}`);
                     setHackathon(response.data);
-                } catch (err) {
+                } catch (_err) {
                     setError('Failed to load hackathon details. It might not exist.');
                 } finally {
                     setIsLoading(false);
@@ -85,8 +85,8 @@ export default function HackathonDetailPage() {
             await axios.post('/api/teams/join', { token: joinToken });
             alert('Successfully joined team!');
             setJoinToken('');
-        } catch (error: any) {
-            alert(`Failed to join team: ${error.response?.data?.message}`);
+        } catch (error) {
+            alert(`Failed to join team: ${(error as any).response?.data?.message}`);
         }
     };
     

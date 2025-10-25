@@ -29,7 +29,7 @@ export default function MyHackathonsPage() {
         <div>
             <h1 className="text-4xl font-bold mb-2">My Hackathons</h1>
             <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
-                All the events you've registered for, in one place.
+                All the events you&apos;ve registered for, in one place.
             </p>
 
             {isLoading ? (
@@ -51,7 +51,7 @@ export default function MyHackathonsPage() {
                     ))}
                 </div>
             ) : (
-                <p>You haven't registered for any hackathons yet. Head over to the "Explore" page to find one!</p>
+                <p>You haven&apos;t registered for any hackathons yet. Head over to the &quot;Explore&quot; page to find one!</p>
             )}
         </div>
     );

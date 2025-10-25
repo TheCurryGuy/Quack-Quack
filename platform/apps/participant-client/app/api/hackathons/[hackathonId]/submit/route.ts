@@ -2,16 +2,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prismaClient } from 'db/client';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 
-export async function POST(req: NextRequest, { params }: { params: { hackathonId: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ hackathonId: string }> }) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
         return NextResponse.json({ message: 'Authentication required.' }, { status: 401 });
     }
 
     try {
-        const { hackathonId } = params;
+        const { hackathonId } = await params;
         const body = await req.json();
         const { title, about, problem, githubUrl, techStacks, aiScore } = body;
 

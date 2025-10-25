@@ -6,7 +6,7 @@ import { jwtVerify } from 'jose';
 const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 interface HostJWTPayload { hostId: string; }
 
-export async function POST(req: NextRequest, { params }: { params: { hackathonId: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ hackathonId: string }> }) {
     const authHeader = req.headers.get('authorization');
     const token = authHeader?.split(' ')[1];
     if (!token) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -14,7 +14,7 @@ export async function POST(req: NextRequest, { params }: { params: { hackathonId
     try {
         const { payload } = await jwtVerify(token, secret);
         const hostId = (payload as unknown as HostJWTPayload).hostId;
-        const { hackathonId } = params;
+        const { hackathonId } = await params;
         const { winners } = await req.json(); // Expecting { winners: [{ teamId: '...', rank: 1 }, ...] }
 
         // Verify host owns the hackathon

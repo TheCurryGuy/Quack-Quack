@@ -2,17 +2,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prismaClient } from 'db/client';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 import { randomBytes } from 'crypto';
 
-export async function POST(req: NextRequest, { params }: { params: { hackathonId: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ hackathonId: string }> }) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
         return NextResponse.json({ message: 'You must be logged in to register a team.' }, { status: 401 });
     }
 
     try {
-        const { hackathonId } = params;
+        const { hackathonId } = await params;
         const body = await req.json();
         const { teamName, members } = body;
 
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest, { params }: { params: { hackathonId
             return NextResponse.json({ message: 'The first member must be the currently logged-in user.' }, { status: 403 });
         }
 
-        let joinTokens: string[] = [];
+        const joinTokens: string[] = [];
         
         await prismaClient.$transaction(async (tx) => {
             // 1. Create the main Team Registration record
@@ -78,8 +78,13 @@ export async function POST(req: NextRequest, { params }: { params: { hackathonId
 
         return NextResponse.json({ message: 'Team registration initiated!', joinTokens }, { status: 201 });
 
-    } catch (error: any) {
-        if (error.code === 'P2002') {
+    } catch (error) {
+        if (
+            typeof error === 'object' &&
+            error !== null &&
+            'code' in error &&
+            (error as { code: unknown }).code === 'P2002'
+        ) {
              return NextResponse.json({ message: 'A team with this name is already registered for this hackathon.' }, { status: 409 });
         }
         console.error('Error creating team registration:', error);

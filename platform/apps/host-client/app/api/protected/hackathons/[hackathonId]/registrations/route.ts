@@ -10,7 +10,7 @@ interface HostJWTPayload {
 }
 
 // The new, rewritten GET handler
-export async function GET(req: NextRequest, { params }: { params: { hackathonId: string } }): Promise<NextResponse> {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ hackathonId: string }> }): Promise<NextResponse> {
   const authHeader = req.headers.get('authorization');
   const token = authHeader?.split(' ')[1];
   if (!token) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -18,7 +18,7 @@ export async function GET(req: NextRequest, { params }: { params: { hackathonId:
   try {
     const { payload } = await jwtVerify(token, secret);
     const hostId = (payload as unknown as HostJWTPayload).hostId;
-    const { hackathonId } = params;
+    const { hackathonId } = await params;
 
     // First, a security check to ensure the host owns this hackathon before proceeding.
     const hackathon = await prismaClient.hackathon.findFirst({

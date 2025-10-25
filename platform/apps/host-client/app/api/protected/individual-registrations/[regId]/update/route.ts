@@ -7,7 +7,7 @@ import { transporter, createApprovalEmail, createRejectionEmail } from '@/lib/no
 const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 interface HostJWTPayload { hostId: string; }
 
-export async function PUT(req: NextRequest, { params }: { params: { regId: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ regId: string }> }) {
     const authHeader = req.headers.get('authorization');
     const token = authHeader?.split(' ')[1];
     if (!token) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -15,7 +15,7 @@ export async function PUT(req: NextRequest, { params }: { params: { regId: strin
     try {
         const { payload } = await jwtVerify(token, secret);
         const hostId = (payload as unknown as HostJWTPayload).hostId;
-        const { regId } = params;
+        const { regId } = await params;
         const { status } = await req.json(); // Expecting { status: 'APPROVED' | 'REJECTED' }
 
         if (!['APPROVED', 'REJECTED'].includes(status)) {

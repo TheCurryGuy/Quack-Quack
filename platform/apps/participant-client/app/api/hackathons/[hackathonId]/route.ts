@@ -2,9 +2,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prismaClient } from 'db/client';
 
-export async function GET(req: NextRequest, { params }: { params: { hackathonId: string } }): Promise<NextResponse> {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ hackathonId: string }> }): Promise<NextResponse> {
     try {
-        const { hackathonId } = params;
+        const { hackathonId } = await params;
 
         if (!hackathonId) {
             return NextResponse.json({ message: 'Hackathon ID is required' }, { status: 400 });
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest, { params }: { params: { hackathonId:
         return NextResponse.json(hackathon, { status: 200 });
 
     } catch (error) {
-        console.error(`Error fetching hackathon ${params.hackathonId}:`, error);
+        console.error(`Error fetching hackathon:`, error);
         return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
     }
 }

@@ -4,6 +4,7 @@ import { prismaClient } from 'db/client';
 import { jwtVerify } from 'jose';
 import { transporter, createApprovalEmail, createRejectionEmail } from '@/lib/nodemailer';
 
+i
 const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
 interface HostJWTPayload {
@@ -11,7 +12,7 @@ interface HostJWTPayload {
 }
 
 // PUT handler to update a registration's status (APPROVE/REJECT)
-export async function PUT(req: NextRequest, { params }: { params: { registrationId: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ registrationId: string }> }) {
   const authHeader = req.headers.get('authorization');
   const token = authHeader?.split(' ')[1];
   if (!token) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -19,7 +20,7 @@ export async function PUT(req: NextRequest, { params }: { params: { registration
   try {
     const { payload } = await jwtVerify(token, secret);
     const hostId = (payload as unknown as HostJWTPayload).hostId;
-    const { registrationId } = params;
+    const { registrationId } = await params;
     const { status } = await req.json(); // Expecting { status: 'APPROVED' | 'REJECTED' }
 
     if (!['APPROVED', 'REJECTED'].includes(status)) {

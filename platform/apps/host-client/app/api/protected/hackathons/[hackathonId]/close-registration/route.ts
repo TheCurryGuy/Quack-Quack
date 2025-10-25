@@ -7,7 +7,7 @@ import Papa from 'papaparse';
 const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 interface HostJWTPayload { hostId: string; }
 
-export async function POST(req: NextRequest, { params }: { params: { hackathonId: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ hackathonId: string }> }) {
     const authHeader = req.headers.get('authorization');
     const token = authHeader?.split(' ')[1];
     if (!token) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -15,7 +15,7 @@ export async function POST(req: NextRequest, { params }: { params: { hackathonId
     try {
         const { payload } = await jwtVerify(token, secret);
         const hostId = (payload as unknown as  HostJWTPayload).hostId;
-        const { hackathonId } = params;
+        const { hackathonId } = await params;
 
         // Using a transaction ensures all data is fetched consistently before we close registration.
         const result = await prismaClient.$transaction(async (tx) => {
@@ -84,9 +84,9 @@ export async function POST(req: NextRequest, { params }: { params: { hackathonId
             teamsCsv
         }, { status: 200 });
 
-    } catch (error: any) {
+    } catch (error) {
         console.error('Error closing registration:', error);
         // We can send a more specific error message back to the client
-        return NextResponse.json({ message: error.message || 'Internal server error' }, { status: 500 });
+        return NextResponse.json({ message: (error as Error).message || 'Internal server error' }, { status: 500 });
     }
 }
