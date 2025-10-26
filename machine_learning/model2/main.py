@@ -1,38 +1,38 @@
 import pandas as pd
 
-def allocate_rooms(teams, rooms, output_file="room_allocation.csv"):
+def allocate_teams_to_rooms(num_rooms, teams_per_room, teams_csv, output_file="room_allocation.csv"):
 
-    if isinstance(teams, str):
-        teams = pd.read_csv(teams)
-    if isinstance(rooms, str):
-        rooms = pd.read_csv(rooms)
- 
-    teams = teams.sort_values(by="size", ascending=False).reset_index(drop=True)
+    if isinstance(teams_csv, str):
+        teams = pd.read_csv(teams_csv)
+    else:
+        teams = teams_csv
 
-    rooms["remaining_capacity"] = rooms["capacity"]
-    
-    assignments = []
+    total_capacity = num_rooms * teams_per_room
 
-    for _, team in teams.iterrows():
-        allocated = False
-        for idx, room in rooms.iterrows():
-            if room["remaining_capacity"] >= team["size"]:
-                assignments.append({"team": team["team"], "room": room["room"]})
-                rooms.loc[idx, "remaining_capacity"] -= team["size"]
-                allocated = True
-                break
-        if not allocated:
-            assignments.append({"team": team["team"], "room": "None"})
 
-    allocation_df = pd.DataFrame(assignments)
+    if len(teams) > total_capacity:
+        print(f"⚠️ Only {total_capacity} teams can be allocated. {len(teams) - total_capacity} teams will remain unassigned.")
+        teams = teams.head(total_capacity)
 
-    allocation_df["room_sort"] = allocation_df["room"].apply(
-        lambda x: int(x.replace("Room", "")) if x.startswith("Room") else 99999
-)
-    allocation_df = allocation_df.sort_values(by=["room_sort", "team"]).drop(columns=["room_sort"])
+    allocations = []
+    room_counter = 1
+    team_counter = 0
+
+    for _, row in teams.iterrows():
+        room_name = f"Room{room_counter}"
+        allocations.append({"room_name": room_name, "team_name": row["team_name"]})
+        team_counter += 1
+
+        
+        if team_counter % teams_per_room == 0:
+            room_counter += 1
+            if room_counter > num_rooms:
+                break  
+
+    allocation_df = pd.DataFrame(allocations)
 
     allocation_df.to_csv(output_file, index=False)
-    print(f"✅ Allocation saved to {output_file}")
+    print(f"✅ Allocation complete! Saved to {output_file}")
 
     return allocation_df
 
