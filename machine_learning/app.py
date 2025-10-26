@@ -7,10 +7,12 @@ import os
 import shutil
 from io import BytesIO
 import pandas as pd
-import io, csv
+
+ 
 
 from machine_learning.model2.main import allocate_rooms   
-from machine_learning.model3.main import get_predictions_csv_path_for
+from machine_learning.model3.main import get_predictions_csv_path_for, MODEL_PATH, train_model, predict_score_from_json
+from pydantic import BaseModel
 import tempfile
 
 from machine_learning.model1.part1 import evaluate_candidate
@@ -30,8 +32,6 @@ def home():
 
 
 # --- Model 1 Endpoint ---
-# -----------------------------
-
 class CandidateInput(BaseModel):
     name: str
     tech_stack_used: str
@@ -71,7 +71,6 @@ async def form_teams(file: UploadFile = File(...)):
     )
 
 
-# -------------------------------
 # --- Model 2 Endpoint upload two CSVs, save + download) ---
 @app.post("/model2/upload")
 async def upload_and_run_model2(teams_file: UploadFile = File(...), rooms_file: UploadFile = File(...)):
@@ -123,3 +122,22 @@ async def upload_and_run_model3(file: UploadFile = File(...)):
                 os.remove(temp_input_path)
         except Exception:
             pass
+
+
+# --- Model 3 JSON Endpoint ---
+
+class TeamInput(BaseModel):
+    team_name: str
+    tech_stack_used: str
+    
+@app.post("/model3/predict")
+def predict_score(team_input: TeamInput):
+    try:
+        json_input = {
+            "team_name": team_input.team_name,
+            "tech_stack_used": team_input.tech_stack_used
+        }
+        predicted_score = predict_score_from_json(json_input)
+        return {'predicted_score':predicted_score}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
