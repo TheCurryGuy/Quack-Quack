@@ -1,15 +1,22 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse
+from pydantic import BaseModel
+from fastapi.responses import FileResponse, JSONResponse
+from typing import List
 import os
 import shutil
 from io import BytesIO
 import pandas as pd
+
  
 
 from machine_learning.model2.main import allocate_rooms   
 from machine_learning.model3.main import get_predictions_csv_path_for, MODEL_PATH, train_model, predict_score_from_json
 from pydantic import BaseModel
 import tempfile
+
+from machine_learning.model1.part1 import evaluate_candidate
+from machine_learning.model1.part2 import form_teams_from_csv
 
 
 app = FastAPI(title="Machine Learning Models API")
@@ -25,6 +32,43 @@ def home():
 
 
 # --- Model 1 Endpoint ---
+class CandidateInput(BaseModel):
+    name: str
+    tech_stack_used: str
+
+
+## --- Endpoint 1: Evaluate Candidate ---
+@app.post("/model1/evaluate")
+def evaluate_candidate_api(data: CandidateInput):
+   
+
+    cleaned_stack = data.tech_stack_used.replace("  ", ",").replace(" ,", ",").strip()
+    skills = [s.strip() for s in cleaned_stack.split(",") if s.strip()]
+
+    _, score, _ = evaluate_candidate(data.name, skills)
+
+    return {"score": score}
+
+## --- Endpoint 2: Form Teams ---
+@app.post("/model1/form_teams", response_class=FileResponse)
+async def form_teams(file: UploadFile = File(...)):
+    
+
+    content = await file.read()
+    csv_content = content.decode("utf-8")
+
+    teams_csv = form_teams_from_csv(csv_content)
+
+    os.makedirs("outputs", exist_ok=True)
+    file_path = "outputs/teams.csv"
+    with open(file_path, "w", encoding="utf-8", newline="") as f:
+        f.write(teams_csv)
+
+    return FileResponse(
+        path=file_path,
+        filename="teams.csv",
+        media_type="text/csv"
+    )
 
 
 # --- Model 2 Endpoint upload two CSVs, save + download) ---
@@ -97,7 +141,3 @@ def predict_score(team_input: TeamInput):
         return {'predicted_score':predicted_score}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-
-
-
