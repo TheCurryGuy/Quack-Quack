@@ -49,6 +49,24 @@ export default function HackathonList() {
     fetchHackathons();
   }, [token]); // Re-fetch if the token changes
 
+  const handleDownloadTeamNames = async (hackathonId: string) => {
+    try {
+      const response = await axios.get(`/api/protected/hackathons/${hackathonId}/team-names`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `team-names-${hackathonId}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Failed to download team names", error);
+    }
+  };
+
   if (isLoading) {
     return <p>Loading your hackathons...</p>;
   }
@@ -76,16 +94,21 @@ export default function HackathonList() {
                 <CardContent>
                   <div className="space-y-2">
                     <p>Registration Closes: {new Date(hackathon.registrationDeadline).toLocaleDateString()}</p>
-                    <Badge>Upcoming</Badge> 
+                    <Badge>Upcoming</Badge>
                   </div>
                 </CardContent>
               </div>
-              <CardFooter>
-                <Link href={`/dashboard/hackathon/${hackathon.id}/edit`} legacyBehavior>
-                  <a className="w-full">
-                    <Button variant="secondary" className="w-full">Manage</Button>
-                  </a>
-                </Link>
+              <CardFooter className="flex flex-col gap-2 items-stretch">
+                <Button variant="secondary" className="w-full" asChild>
+                  <Link href={`/dashboard/hackathon/${hackathon.id}/edit`}>Manage</Link>
+                </Button>
+                {/* NEW BUTTON */}
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => handleDownloadTeamNames(hackathon.id)}>
+                  Download Team Names
+                </Button>
               </CardFooter>
             </Card>
           ))}

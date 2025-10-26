@@ -5,6 +5,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '@/app/context/AuthContext';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
@@ -117,6 +118,14 @@ export default function EventControls({ hackathon, onHackathonStart }: { hackath
                     <Button variant="outline" onClick={handleGetSubmissions} disabled={isLoading} className="w-full">
                         {isLoading ? 'Exporting...' : 'Export Submissions CSV'}
                     </Button>
+                )}
+                {/* NEW/UPDATED: Button appears when hackathon is over */}
+                {(hackathon.status === 'LIVE') && (
+                    <Link href={`/dashboard/hackathon/${hackathon.id}/submissions`} passHref>
+                        <Button variant="outline" className="w-full">
+                           View & Export Submissions
+                        </Button>
+                    </Link>
                 )}
 
                 {/* STATE 3: Hackathon has officially ended (winners announced) */}
