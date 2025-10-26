@@ -4,22 +4,20 @@
 import { useAuth } from "@/app/context/AuthContext";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import CreateHackathonForm from "@/components/dashboard/CreateHackathonForm";
-import HackathonList from "@/components/HackathonList";
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { List, Wrench } from "lucide-react";
+import Link from "next/link";
 
 export default function DashboardPage() {
   const { token, isLoading } = useAuth();
   const router = useRouter();
 
-  // This is the same protection logic we had before.
-  // It ensures unauthenticated users can't access this page.
   useEffect(() => {
     if (!isLoading && !token) {
       router.push('/login');
     }
   }, [token, isLoading, router]);
 
-  // While the auth state is being determined, show a loading indicator.
   if (isLoading || !token) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -28,24 +26,44 @@ export default function DashboardPage() {
     );
   }
 
-  // Once authenticated, render the main dashboard content.
+  // A proper overview dashboard
   return (
     <div className="p-4 md:p-8 space-y-8">
       <div>
-        <h1 className="text-4xl font-bold">Dashboard</h1>
+        <h1 className="text-4xl font-bold">Welcome, Host!</h1>
         <p className="text-lg text-gray-600 dark:text-gray-400">
-          Create a new event or manage your existing ones.
+          Here's a quick overview of your administrative panel.
         </p>
       </div>
-      
-      {/* The component to create a new hackathon */}
-      <CreateHackathonForm />
 
-      {/* A divider for style */}
-      <div className="my-8 border-t border-gray-200 dark:border-gray-700"></div>
-      
-      {/* The component that lists all existing hackathons */}
-      <HackathonList />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Link href="/dashboard/my-hackathons">
+            <Card className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                <CardHeader>
+                    <div className="flex items-center gap-4">
+                        <List className="h-8 w-8 text-blue-500" />
+                        <div>
+                            <CardTitle>Manage My Hackathons</CardTitle>
+                            <CardDescription>View, create, and edit your events. This is where you'll manage participant approvals.</CardDescription>
+                        </div>
+                    </div>
+                </CardHeader>
+            </Card>
+        </Link>
+        <Link href="/dashboard/tools">
+            <Card className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                 <CardHeader>
+                    <div className="flex items-center gap-4">
+                        <Wrench className="h-8 w-8 text-green-500" />
+                        <div>
+                            <CardTitle>Access AI Tools</CardTitle>
+                            <CardDescription>Use powerful AI models for team formation and room allocation.</CardDescription>
+                        </div>
+                    </div>
+                </CardHeader>
+            </Card>
+        </Link>
+      </div>
     </div>
   );
 }

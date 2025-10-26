@@ -8,6 +8,7 @@ import { useAuth } from '@/app/context/AuthContext';
 
 const navItems = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    { name: 'My Hackathons', href: '/dashboard/my-hackathons', icon: List },
     { name: 'AI Tools', href: '/dashboard/tools', icon: Wrench },
 ];
 
