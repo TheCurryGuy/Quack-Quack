@@ -12,7 +12,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
-export default function CreateHackathonForm() {
+interface CreateHackathonFormProps {
+  onSuccess?: () => void;
+}
+
+export default function CreateHackathonForm({ onSuccess }: CreateHackathonFormProps) {
   const { token } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -82,6 +86,11 @@ export default function CreateHackathonForm() {
 
       setSuccess('Hackathon created successfully!');
       (event.target as HTMLFormElement).reset(); // Reset form on success
+      
+      // Call the onSuccess callback to trigger refetch
+      if (onSuccess) {
+        onSuccess();
+      }
       
     } catch (err: any) {
       setError(err.message);

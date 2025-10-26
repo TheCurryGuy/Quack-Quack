@@ -14,7 +14,8 @@ declare module "next-auth" {
 
 // Define our configuration in a separate, exportable constant.
 export const authOptions: AuthOptions = {
-    adapter: PrismaAdapter(prismaClient),
+    // Commenting out adapter to use pure JWT - uncomment if you want database sessions
+    // adapter: PrismaAdapter(prismaClient) as any,
     providers: [
         GitHubProvider({
             clientId: process.env.GITHUB_CLIENT_ID!,
@@ -22,17 +23,27 @@ export const authOptions: AuthOptions = {
         }),
     ],
     callbacks: {
-        async session({ session, user }) {
-            // This logic correctly adds the user ID from the database 'user' object
-            // to the client-side 'session.user' object.
-            if (session.user) {
-                session.user.id = user.id;
+        async session({ session, token }) {
+            // When using JWT strategy, user data comes from token
+            if (session.user && token) {
+                session.user.id = token.sub!;
             }
             return session;
+        },
+        async jwt({ token, account, profile }) {
+            // Persist user info in JWT token
+            if (account && profile) {
+                token.sub = (profile as any).id?.toString() || token.sub;
+            }
+            return token;
         },
     },
     session: {
         strategy: "jwt",
     },
     secret: process.env.NEXTAUTH_SECRET,
+    pages: {
+        signIn: '/login',
+        error: '/login', // Redirect to login page on error
+    },
 };

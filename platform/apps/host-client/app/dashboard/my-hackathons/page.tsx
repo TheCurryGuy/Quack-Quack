@@ -1,10 +1,18 @@
 // apps/host-client/app/dashboard/my-hackathons/page.tsx
 "use client";
 
+import { useState } from "react";
 import CreateHackathonForm from "@/components/dashboard/CreateHackathonForm";
 import HackathonList from "@/components/HackathonList";
 
 export default function MyHackathonsPage() {
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const handleHackathonCreated = () => {
+    // Increment the trigger to cause HackathonList to refetch
+    setRefreshTrigger(prev => prev + 1);
+  };
+
   return (
     <div className="p-4 md:p-8 space-y-8">
       <div>
@@ -15,13 +23,13 @@ export default function MyHackathonsPage() {
       </div>
       
       {/* The component to create a new hackathon */}
-      <CreateHackathonForm />
+      <CreateHackathonForm onSuccess={handleHackathonCreated} />
 
       {/* A divider for style */}
       <div className="my-8 border-t border-gray-200 dark:border-gray-700"></div>
       
       {/* The component that lists all existing hackathons */}
-      <HackathonList />
+      <HackathonList key={refreshTrigger} />
     </div>
   );
 }

@@ -1,36 +1,27 @@
 // apps/host-client/app/api/upload/route.ts
-import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
+import { put } from '@vercel/blob';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request): Promise<NextResponse> {
-  const body = (await request.json()) as HandleUploadBody;
+  // 1. Get the filename from the URL parameters (e.g., /api/upload?filename=logo.png)
+  const { searchParams } = new URL(request.url);
+  const filename = searchParams.get('filename');
 
-  try {
-    const jsonResponse = await handleUpload({
-      body,
-      request,
-      onBeforeGenerateToken: async (pathname: string) => {
-        // This is where you can add checks, like ensuring the user is authenticated.
-        // For now, we'll allow uploads from any authenticated-like session.
-        return {
-          allowedContentTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
-          tokenPayload: JSON.stringify({
-            // You can add any custom metadata here if needed
-          }),
-        };
-      },
-      onUploadCompleted: async ({ blob, tokenPayload }) => {
-        // You can perform any actions on the blob after upload here,
-        // like saving the URL to your database. For now, we'll do this on the client.
-        console.log('Blob upload completed', blob, tokenPayload);
-      },
-    });
-
-    return NextResponse.json(jsonResponse);
-  } catch (error) {
+  // 2. We need both a filename and the request body to proceed.
+  if (!filename || !request.body) {
     return NextResponse.json(
-      { error: (error as Error).message },
-      { status: 400 }, // The error returned by handleUpload is a 400
+      { message: 'Filename and file body are required.' },
+      { status: 400 },
     );
   }
+
+  // 3. Use the 'put' function from @vercel/blob/server.
+  // This function is designed to take the raw request body (which is a file stream)
+  // and upload it directly to Vercel Blob.
+  const blob = await put(filename, request.body, {
+    access: 'public', // This is CRUCIAL. It makes the uploaded images viewable by anyone on the web.
+  });
+
+  // 4. 'put' returns a JSON object with the URL and other details. We send this back to the client.
+  return NextResponse.json(blob);
 }
