@@ -11,7 +11,7 @@ interface HostJWTPayload {
 
 // Helper function to get hostId from token
 async function getHostIdFromToken(req: NextRequest): Promise<string | null> {
-  const authHeader = req.headers.get('authorization');
+  const authHeader = req.headers.get('Authorization');
   const token = authHeader?.split(' ')[1];
   if (!token) return null;
 

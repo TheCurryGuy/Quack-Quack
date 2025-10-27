@@ -8,7 +8,7 @@ const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 interface HostJWTPayload { hostId: string; }
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ regId: string }> }) {
-    const authHeader = req.headers.get('authorization');
+    const authHeader = req.headers.get('Authorization');
     const token = authHeader?.split(' ')[1];
     if (!token) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 

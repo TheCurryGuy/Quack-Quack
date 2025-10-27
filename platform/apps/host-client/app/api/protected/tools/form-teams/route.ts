@@ -7,7 +7,7 @@ const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
 export async function POST(req: NextRequest) {
     // Security Check: Verify the host is logged in before proceeding.
-    const authHeader = req.headers.get('authorization');
+    const authHeader = req.headers.get('Authorization');
     const token = authHeader?.split(' ')[1];
     if (!token) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     try {

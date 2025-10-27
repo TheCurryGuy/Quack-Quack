@@ -16,7 +16,7 @@ interface HostJWTPayload {
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     // 1. Get the token from the Authorization header (already checked by middleware, but we need the payload)
-    const authHeader = req.headers.get('authorization');
+    const authHeader = req.headers.get('Authorization');
     const token = authHeader?.split(' ')[1];
 
     if (!token) {
@@ -73,7 +73,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
-    const authHeader = req.headers.get('authorization');
+    const authHeader = req.headers.get('Authorization');
     const token = authHeader?.split(' ')[1];
 
     if (!token) {

@@ -11,7 +11,7 @@ interface HostJWTPayload {
 
 // The new, rewritten GET handler
 export async function GET(req: NextRequest, { params }: { params: Promise<{ hackathonId: string }> }): Promise<NextResponse> {
-  const authHeader = req.headers.get('authorization');
+  const authHeader = req.headers.get('Authorization');
   const token = authHeader?.split(' ')[1];
   if (!token) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
