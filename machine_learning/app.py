@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Query
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from fastapi.responses import FileResponse, JSONResponse
@@ -8,10 +8,8 @@ import shutil
 from io import BytesIO
 import pandas as pd
 
- 
-
 from machine_learning.model2.main import allocate_rooms   
-from machine_learning.model3.main import get_predictions_csv_path_for, MODEL_PATH, train_model, predict_score_from_json
+from machine_learning.model3.main import get_predictions_csv_path_for, predict_score_from_json
 from pydantic import BaseModel
 import tempfile
 
@@ -45,9 +43,13 @@ def evaluate_candidate_api(data: CandidateInput):
     cleaned_stack = data.tech_stack_used.replace("  ", ",").replace(" ,", ",").strip()
     skills = [s.strip() for s in cleaned_stack.split(",") if s.strip()]
 
-    _, score, _ = evaluate_candidate(data.name, skills)
+    name, score, eligible_to = evaluate_candidate(data.name, skills)
 
-    return {"score": score}
+    return {
+        "name": name,
+        "score": score,
+        "eligible_to": eligible_to
+    }
 
 ## --- Endpoint 2: Form Teams ---
 @app.post("/model1/form_teams", response_class=FileResponse)
@@ -69,18 +71,18 @@ async def form_teams(file: UploadFile = File(...)):
         filename="teams.csv",
         media_type="text/csv"
     )
+    
+    
 
-
-# --- Model 2 Endpoint upload two CSVs, save + download) ---
+# --- Model 2 Endpoint upload 1 CSV + two integers) ---
 @app.post("/model2/upload")
-async def upload_and_run_model2(teams_file: UploadFile = File(...), rooms_file: UploadFile = File(...)):
+async def upload_and_run_model2(file: UploadFile = File(...), no_of_rooms_available: int = Query(...), each_room_capacity: int = Query(...)):
     try:
-        teams_df = pd.read_csv(BytesIO(await teams_file.read()))
-        rooms_df = pd.read_csv(BytesIO(await rooms_file.read()))
+        teams_df = pd.read_csv(BytesIO(await file.read()))
 
         os.makedirs(OUTPUT_DIR, exist_ok=True)
         final_output_path = os.path.abspath(os.path.join(OUTPUT_DIR, "room_allocation.csv"))
-        allocate_rooms(teams_df, rooms_df, final_output_path)
+        allocate_rooms(teams_df, no_of_rooms_available, each_room_capacity, final_output_path)
 
         if not os.path.exists(final_output_path):
             raise RuntimeError("Model 2 did not produce an output CSV.")
@@ -138,6 +140,9 @@ def predict_score(team_input: TeamInput):
             "tech_stack_used": team_input.tech_stack_used
         }
         predicted_score = predict_score_from_json(json_input)
-        return {'predicted_score':predicted_score}
+        return {
+            "name": team_input.team_name,
+            "score": predicted_score
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

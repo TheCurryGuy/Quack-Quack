@@ -1,38 +1,41 @@
 import pandas as pd
-
-def allocate_teams_to_rooms(num_rooms, teams_per_room, teams_csv, output_file="room_allocation.csv"):
-
-    if isinstance(teams_csv, str):
-        teams = pd.read_csv(teams_csv)
-    else:
-        teams = teams_csv
-
-    total_capacity = num_rooms * teams_per_room
-
-
-    if len(teams) > total_capacity:
-        print(f"⚠️ Only {total_capacity} teams can be allocated. {len(teams) - total_capacity} teams will remain unassigned.")
-        teams = teams.head(total_capacity)
-
-    allocations = []
-    room_counter = 1
-    team_counter = 0
-
-    for _, row in teams.iterrows():
-        room_name = f"Room{room_counter}"
-        allocations.append({"room_name": room_name, "team_name": row["team_name"]})
-        team_counter += 1
-
+import os
+ 
+ 
+def allocate_rooms(teams_df, num_rooms, teams_per_room, output_file="room_allocation.csv"):
+    if isinstance(teams_df, str):
+        teams_df = pd.read_csv(teams_df)
+    
+    assignments = []
+    room_number = 1
+    teams_in_current_room = 0
+    
+    for _, row in teams_df.iterrows():
+        team_id = row["team"]
         
-        if team_counter % teams_per_room == 0:
-            room_counter += 1
-            if room_counter > num_rooms:
-                break  
-
-    allocation_df = pd.DataFrame(allocations)
-
+        if teams_in_current_room >= teams_per_room:
+            room_number += 1
+            teams_in_current_room = 0
+        
+        assignments.append({"team": team_id, "room_number": f"Room_{room_number}"})
+        teams_in_current_room += 1
+    
+    allocation_df = pd.DataFrame(assignments)
     allocation_df.to_csv(output_file, index=False)
-    print(f"✅ Allocation complete! Saved to {output_file}")
-
+    print(f"✅ Allocation saved to {output_file}")
+    
     return allocation_df
+
+
+if __name__ == "__main__":  
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    input_file = os.path.join(BASE_DIR, "team2 (2).csv")
+    
+    num_rooms = 10
+    teams_per_room = 6
+    output_file = "room_allocation.csv"
+    
+    result = allocate_rooms(input_file, num_rooms, teams_per_room, output_file)
+    print("\nAllocation Result:")
+    print(result)
 
