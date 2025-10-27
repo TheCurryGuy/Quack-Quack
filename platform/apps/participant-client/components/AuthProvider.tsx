@@ -1,13 +1,12 @@
-// apps/participant-client/app/components/AuthProvider.tsx
-"use client";
+"use client"
 
-import { SessionProvider } from "next-auth/react";
-import { ReactNode } from "react";
+import { SessionProvider } from "next-auth/react"
+import type { ReactNode } from "react"
 
-interface Props {
-  children: ReactNode;
+interface AuthProviderProps {
+  children: ReactNode
 }
 
-export default function AuthProvider({ children }: Props) {
-  return <SessionProvider>{children}</SessionProvider>;
+export default function AuthProvider({ children }: AuthProviderProps) {
+  return <SessionProvider>{children}</SessionProvider>
 }
