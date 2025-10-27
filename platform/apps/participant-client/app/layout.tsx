@@ -1,30 +1,30 @@
-// apps/participant-client/app/layout.tsx
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import AuthProvider from "@/components/AuthProvider"; // <-- Import
-import Navbar from "@/components/Navbar";
+import type React from "react"
+import type { Metadata } from "next"
+import { Inter } from "next/font/google"
+import "./globals.css"
+import AuthProvider from "@/components/AuthProvider"
+import Navbar from "@/components/Navbar"
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "HackVerse",
   description: "Join and compete in the next big hackathon.",
-};
+}
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
     <html lang="en">
       <body className={inter.className}>
         <AuthProvider>
           <Navbar />
-          {children}
-        </AuthProvider> {/* <-- Wrap here */}
+          <main className="min-h-screen bg-background">{children}</main>
+        </AuthProvider>
       </body>
     </html>
-  );
+  )
 }

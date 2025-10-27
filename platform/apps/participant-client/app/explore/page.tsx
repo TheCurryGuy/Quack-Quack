@@ -7,36 +7,42 @@ import { Loader2 } from "lucide-react"
 
 type HackathonFromApi = Omit<HackathonCardProps, "description" | "href"> & { body: string }
 
-export default function MyHackathonsPage() {
+export default function DashboardExplorePage() {
   const [hackathons, setHackathons] = useState<HackathonFromApi[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchMyHackathons = async () => {
+    const fetchHackathons = async () => {
       try {
-        const response = await axios.get("/api/my-hackathons")
+        const response = await axios.get("/api/hackathons")
         setHackathons(response.data)
-      } catch (error) {
-        console.error("Failed to fetch user's hackathons", error)
+      } catch (err) {
+        setError("Could not fetch hackathons. Please try again later.")
+        console.error(err)
       } finally {
         setIsLoading(false)
       }
     }
-    fetchMyHackathons()
+    fetchHackathons()
   }, [])
 
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">My Hackathons</h1>
-        <p className="text-lg text-muted-foreground">All the events you&apos;ve registered for, in one place.</p>
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Explore Hackathons</h1>
+        <p className="text-lg text-muted-foreground">Find your next challenge and build something extraordinary.</p>
       </div>
 
       {/* Content */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      ) : error ? (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-6">
+          <p className="text-destructive font-medium">{error}</p>
         </div>
       ) : hackathons.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -49,15 +55,13 @@ export default function MyHackathonsPage() {
               startDate={hackathon.startDate}
               status={hackathon.status}
               description={hackathon.body}
-              href={`/dashboard/hackathon/${hackathon.id}`}
+              href={`/hackathon/${hackathon.id}`}
             />
           ))}
         </div>
       ) : (
         <div className="rounded-lg border border-border bg-card p-12 text-center">
-          <p className="text-muted-foreground">
-            You haven&apos;t registered for any hackathons yet. Head over to the &quot;Explore&quot; page to find one!
-          </p>
+          <p className="text-muted-foreground">No active hackathons at the moment. Check back soon!</p>
         </div>
       )}
     </div>
