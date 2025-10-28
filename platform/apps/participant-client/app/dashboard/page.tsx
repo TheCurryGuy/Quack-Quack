@@ -91,7 +91,7 @@ export default function DashboardPage() {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Link
-          href="/explore"
+          href="/dashboard/explore"
           className="bg-primary text-primary-foreground rounded-lg p-6 hover:shadow-lg transition-all hover:scale-105 active:scale-95"
         >
           <div className="flex items-center justify-between">
@@ -152,7 +152,7 @@ export default function DashboardPage() {
           <div className="bg-card border border-border rounded-lg p-12 text-center">
             <p className="text-muted-foreground mb-4">No hackathons registered yet</p>
             <Link
-              href="/explore"
+              href="/dashboard/explore"
               className="inline-block bg-primary text-primary-foreground px-6 py-2 rounded-lg hover:shadow-md transition-shadow"
             >
               Explore Events
