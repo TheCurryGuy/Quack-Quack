@@ -2,21 +2,50 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prismaClient } from 'db/client';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 
-export async function GET(req: NextRequest, { params }: { params: { hackathonId: string } }) {
+interface TeamDetails {
+    id: string;
+    name: string;
+    bio: string | null;
+    skills: string | null;
+    members: {
+        name: string | null;
+        image: string | null;
+    }[];
+}
+
+interface SubmissionDetails {
+    id: string;
+    teamId: string;
+    title: string;
+    about: string;
+    problem: string;
+    githubUrl: string;
+    techStacks: string[];
+    aiScore: number | null;
+    createdAt: Date;
+}
+
+interface MyStatusResponse {
+    registrationStatus: string | null;
+    teamDetails: TeamDetails | null;
+    submissionDetails: SubmissionDetails | null;
+}
+
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ hackathonId: string }> }) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const { hackathonId } = params;
+    const { hackathonId } = await params;
     const userId = session.user.id;
 
     try {
         let registrationStatus: string | null = null;
-        let teamDetails: any = null;
-        let submissionDetails: any = null;
+        let teamDetails: TeamDetails | null = null;
+        let submissionDetails: SubmissionDetails | null = null;
 
         // Check for an individual registration
         const individualReg = await prismaClient.individualRegistration.findUnique({
@@ -54,7 +83,7 @@ export async function GET(req: NextRequest, { params }: { params: { hackathonId:
                     name: finalTeam.name,
                     bio: finalTeam.bio,
                     skills: finalTeam.skills,
-                    members: finalTeam.members.map(m => m.user)
+                    members: finalTeam.members.map((m: { user: { name: string | null; image: string | null; }; }) => m.user)
                 };
                 if (finalTeam.submission){
                     submissionDetails = finalTeam.submission;
@@ -66,7 +95,8 @@ export async function GET(req: NextRequest, { params }: { params: { hackathonId:
             return NextResponse.json({ message: 'User not registered for this hackathon.' }, { status: 404 });
         }
 
-        return NextResponse.json({ registrationStatus, teamDetails, submissionDetails }, { status: 200 });
+        const response: MyStatusResponse = { registrationStatus, teamDetails, submissionDetails };
+        return NextResponse.json(response, { status: 200 });
 
     } catch (error) {
         console.error('Error fetching my-status:', error);

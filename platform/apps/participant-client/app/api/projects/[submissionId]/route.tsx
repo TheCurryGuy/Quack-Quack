@@ -2,9 +2,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prismaClient } from 'db/client';
 
-export async function GET(req: NextRequest, { params }: { params: { submissionId: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ submissionId: string }> }) {
     try {
-        const { submissionId } = params;
+        const { submissionId } = await params;
         const submission = await prismaClient.projectSubmission.findUnique({
             where: { id: submissionId },
             include: {
@@ -19,6 +19,7 @@ export async function GET(req: NextRequest, { params }: { params: { submissionId
         if (!submission) return NextResponse.json({ message: 'Project not found.' }, { status: 404 });
         return NextResponse.json(submission, { status: 200 });
     } catch (error) {
+        console.error("Error fetching submission:", error);
         return NextResponse.json({ message: 'Internal server error.' }, { status: 500 });
     }
 }

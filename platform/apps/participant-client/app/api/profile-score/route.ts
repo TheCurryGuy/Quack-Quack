@@ -40,9 +40,13 @@ export async function POST(req: NextRequest) {
         // We are assuming your API returns a body like: { name: "...", score: 82, eligible_to: "..." }
         return NextResponse.json(responseFromAi.data, { status: 200 });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         // 7. Robust error handling
-        console.error('Error in profile-score API bridge:', error.response?.data || error.message);
+        if (axios.isAxiosError(error)) {
+            console.error('Error in profile-score API bridge:', error.response?.data || error.message);
+        } else {
+            console.error('An unexpected error occurred:', error);
+        }
         
         // Return a generic error to the client to avoid leaking implementation details
         return NextResponse.json({ message: 'An error occurred while calculating the profile score.' }, { status: 502 }); // 502 Bad Gateway is appropriate for upstream errors

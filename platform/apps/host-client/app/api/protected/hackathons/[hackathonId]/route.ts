@@ -11,26 +11,26 @@ interface HostJWTPayload {
 
 // Helper function to get hostId from token
 async function getHostIdFromToken(req: NextRequest): Promise<string | null> {
-  const authHeader = req.headers.get('authorization');
+  const authHeader = req.headers.get('Authorization');
   const token = authHeader?.split(' ')[1];
   if (!token) return null;
 
   try {
     const { payload } = await jwtVerify(token, secret);
     return (payload as unknown as HostJWTPayload).hostId;
-  } catch (err) {
+  } catch (_err) {
     return null;
   }
 }
 
 // --- GET Handler: Fetch a single hackathon by its ID ---
-export async function GET(req: NextRequest, { params }: { params: { hackathonId: string } }) : Promise<NextResponse> {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ hackathonId: string }> }) : Promise<NextResponse> {
   const hostId = await getHostIdFromToken(req);
   if (!hostId) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
-  const { hackathonId } = params;
+  const { hackathonId } = await params;
 
   try {
     const hackathon = await prismaClient.hackathon.findFirst({
@@ -51,13 +51,13 @@ export async function GET(req: NextRequest, { params }: { params: { hackathonId:
 }
 
 // --- PUT Handler: Update a hackathon by its ID ---
-export async function PUT(req: NextRequest, { params }: { params: { hackathonId: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ hackathonId: string }> }) {
     const hostId = await getHostIdFromToken(req);
     if (!hostId) {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const { hackathonId } = params;
+    const { hackathonId } = await params;
     const body = await req.json();
 
     try {
@@ -84,7 +84,7 @@ export async function PUT(req: NextRequest, { params }: { params: { hackathonId:
         }
 
         return NextResponse.json({ message: 'Hackathon updated successfully' }, { status: 200 });
-    } catch (error) {
+    } catch (_error) {
         return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
     }
 }

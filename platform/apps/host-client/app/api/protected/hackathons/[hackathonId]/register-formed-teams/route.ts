@@ -12,15 +12,15 @@ interface FormedTeamRow {
     members_emails: string; // Comma-separated emails
 }
 
-export async function POST(req: NextRequest, { params }: { params: { hackathonId: string } }) {
-    const authHeader = req.headers.get('authorization');
+export async function POST(req: NextRequest, { params }: { params: Promise<{ hackathonId: string }> }) {
+    const authHeader = req.headers.get('Authorization');
     const token = authHeader?.split(' ')[1];
     if (!token) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     
     try {
         const { payload } = await jwtVerify(token, secret);
         const hostId = (payload as unknown as HostJWTPayload).hostId;
-        const { hackathonId } = params;
+        const { hackathonId } = await params;
 
         // Verify host owns the hackathon
         const hackathon = await prismaClient.hackathon.findFirst({

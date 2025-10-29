@@ -1,78 +1,91 @@
-// apps/participant-client/app/components/HackathonTimer.tsx
-"use client";
+"use client"
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Timer } from 'lucide-react';
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CheckCircle2, Clock } from "lucide-react"
 
 interface HackathonTimerProps {
-    status: 'UPCOMING' | 'LIVE' | 'ENDED';
-    startDate: string;
-    actualStartTime: string | null;
-    durationHours: number;
+  status: "UPCOMING" | "LIVE" | "ENDED"
+  startDate: string
+  actualStartTime: string | null
+  durationHours: number
 }
 
-// Helper function to format the remaining time
 const formatTime = (ms: number) => {
-    const totalSeconds = Math.floor(ms / 1000);
-    const days = Math.floor(totalSeconds / 86400);
-    const hours = Math.floor((totalSeconds % 86400) / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-    return `${days}d ${hours}h ${minutes}m ${seconds}s`;
-};
+  const totalSeconds = Math.floor(ms / 1000)
+  const days = Math.floor(totalSeconds / 86400)
+  const hours = Math.floor((totalSeconds % 86400) / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+
+  if (days > 0) return `${days}d ${hours}h ${minutes}m`
+  if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`
+  return `${minutes}m ${seconds}s`
+}
 
 export default function HackathonTimer({ status, startDate, actualStartTime, durationHours }: HackathonTimerProps) {
-    const [timeLeft, setTimeLeft] = useState('');
-    const [title, setTitle] = useState('');
+  const [timeLeft, setTimeLeft] = useState("")
+  const [title, setTitle] = useState("")
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            const now = new Date().getTime();
-            
-            if (status === 'UPCOMING') {
-                setTitle('Starts In');
-                const startTime = new Date(startDate).getTime();
-                const distance = startTime - now;
-                setTimeLeft(distance > 0 ? formatTime(distance) : 'Starting soon...');
-            } else if (status === 'LIVE' && actualStartTime) {
-                setTitle('Ends In');
-                const endTime = new Date(actualStartTime).getTime() + durationHours * 60 * 60 * 1000;
-                const distance = endTime - now;
-                setTimeLeft(distance > 0 ? formatTime(distance) : 'Ending now!');
-            } else {
-                setTimeLeft('');
-                setTitle('');
-            }
-        }, 1000);
+  useEffect(() => {
+    const updateTimer = () => {
+      const now = new Date().getTime()
 
-        return () => clearInterval(interval);
-    }, [status, startDate, actualStartTime, durationHours]);
-
-    if (status === 'ENDED' || !title) {
-        return (
-            <Card>
-                <CardHeader><CardTitle>Event Status</CardTitle></CardHeader>
-                <CardContent>
-                    <p className="font-semibold text-center text-red-600">This hackathon has ended.</p>
-                </CardContent>
-            </Card>
-        );
+      if (status === "UPCOMING") {
+        setTitle("Starts In")
+        const startTime = new Date(startDate).getTime()
+        const distance = startTime - now
+        setTimeLeft(distance > 0 ? formatTime(distance) : "Starting soon...")
+      } else if (status === "LIVE" && actualStartTime) {
+        setTitle("Ends In")
+        const endTime = new Date(actualStartTime).getTime() + durationHours * 60 * 60 * 1000
+        const distance = endTime - now
+        setTimeLeft(distance > 0 ? formatTime(distance) : "Ending now!")
+      } else {
+        setTimeLeft("")
+        setTitle("")
+      }
     }
 
+    updateTimer()
+    const interval = setInterval(updateTimer, 1000)
+    return () => clearInterval(interval)
+  }, [status, startDate, actualStartTime, durationHours])
+
+  if (status === "ENDED" || !title) {
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <Timer className="h-5 w-5" />
-                    <span>{title}</span>
-                </CardTitle>
-            </CardHeader>
-            <CardContent>
-                <p className="text-3xl font-bold text-center font-mono tracking-tighter">
-                    {timeLeft}
-                </p>
-            </CardContent>
-        </Card>
-    );
+      <Card className="border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/30">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-red-700 dark:text-red-400">
+            <CheckCircle2 className="h-5 w-5" />
+            <span>Event Completed</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-red-600 dark:text-red-300">
+            This hackathon has ended. Thank you for participating!
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <Card className="border-primary/20 bg-linear-to-br from-primary/5 to-transparent">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-foreground">
+          <Clock className="h-5 w-5 text-primary" />
+          <span>{title}</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          <p className="text-4xl font-bold font-mono tracking-tight text-primary">{timeLeft}</p>
+          <p className="text-xs text-muted-foreground">
+            {status === "UPCOMING" ? "Until the hackathon begins" : "Until the hackathon ends"}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  )
 }

@@ -5,7 +5,17 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "outputs": [".next/**", "!.next/cache/**"],
+      "passThroughEnv": [
+        "GITHUB_CLIENT_ID",
+        "GITHUB_CLIENT_SECRET",
+        "NEXTAUTH_SECRET",
+        "JWT_SECRET",
+        "EMAIL_SERVER_USER",
+        "EMAIL_SERVER_PASSWORD",
+        "EMAIL_FROM_NAME",
+        "EMAIL_FROM"
+      ]
     },
     "lint": {
       "dependsOn": ["^lint"]

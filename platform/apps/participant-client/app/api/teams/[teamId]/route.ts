@@ -2,16 +2,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prismaClient } from 'db/client';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 
-export async function PUT(req: NextRequest, { params }: { params: { teamId: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ teamId: string }> }) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        return NextResponse.json({ message: 'You must be logged in.' }, { status: 401 });
     }
 
     try {
-        const { teamId } = params;
+        const { teamId } = await params;
         const { bio, skills } = await req.json();
 
         // --- Security Check ---

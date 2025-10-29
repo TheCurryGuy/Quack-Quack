@@ -15,7 +15,7 @@ interface FormedTeamRow {
 
 export async function POST(req: NextRequest) {
     // --- Security Verification ---
-    const authHeader = req.headers.get('authorization');
+    const authHeader = req.headers.get('Authorization');
     const token = authHeader?.split(' ')[1];
     if (!token) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     try { await jwtVerify(token, secret); } catch (err) { return NextResponse.json({ message: 'Invalid token' }, { status: 401 }); }

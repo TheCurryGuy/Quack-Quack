@@ -3,10 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prismaClient } from 'db/client';
 import { getServerSession } from 'next-auth/next';
 // We need to import the authOptions we created earlier
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 
 
-export async function POST(req: NextRequest, { params }: { params: { hackathonId: string } }):Promise<NextResponse> {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ hackathonId: string }> }):Promise<NextResponse> {
     const session = await getServerSession(authOptions);
 
 
@@ -15,7 +15,7 @@ export async function POST(req: NextRequest, { params }: { params: { hackathonId
     }
 
     try {
-        const { hackathonId } = params;
+        const { hackathonId } = await params;
         const body = await req.json();
         const { githubUrl, portfolioUrl, college, year, profileScore, eligibility } = body;
 
@@ -40,9 +40,13 @@ export async function POST(req: NextRequest, { params }: { params: { hackathonId
 
         return NextResponse.json(newRegistration, { status: 201 });
 
-    } catch (error: any) {
-        // Handle potential errors, like if the user is already registered (due to unique constraint)
-        if (error.code === 'P2002') {
+    } catch (error: unknown) {
+        if (
+            typeof error === 'object' &&
+            error !== null &&
+            'code' in error &&
+            (error as { code: unknown }).code === 'P2002'
+        ) {
             return NextResponse.json({ message: 'You are already registered for this hackathon.' }, { status: 409 });
         }
         console.error('Error creating individual registration:', error);
