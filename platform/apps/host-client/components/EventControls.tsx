@@ -85,7 +85,7 @@ export default function EventControls({
   const isHackathonOver = endTime ? new Date() > endTime : false
 
   return (
-    <Card className="border-0 shadow-lg">
+    <Card className="border-2 border-chart-2/30 bg-card/50 backdrop-blur-sm hover:border-chart-2/50 transition-all">
       <CardHeader className="pb-6">
         <CardTitle className="text-2xl">Event Controls</CardTitle>
       </CardHeader>

@@ -28,21 +28,21 @@ export default function DashboardExplorePage() {
   }, [])
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Explore Hackathons</h1>
-        <p className="text-lg text-muted-foreground">Find your next challenge and build something extraordinary.</p>
+      <div className="space-y-3">
+        <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight">Explore Hackathons</h1>
+        <p className="text-xl text-muted-foreground">Find your next challenge and build something extraordinary.</p>
       </div>
 
       {/* Content */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
         </div>
       ) : error ? (
-        <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-6">
-          <p className="text-destructive font-medium">{error}</p>
+        <div className="rounded-xl border-2 border-destructive/50 bg-destructive/10 p-8 backdrop-blur-sm">
+          <p className="text-destructive font-semibold text-lg">{error}</p>
         </div>
       ) : hackathons.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -60,8 +60,8 @@ export default function DashboardExplorePage() {
           ))}
         </div>
       ) : (
-        <div className="rounded-lg border border-border bg-card p-12 text-center">
-          <p className="text-muted-foreground">No active hackathons at the moment. Check back soon!</p>
+        <div className="rounded-xl border-2 border-border/60 bg-card/50 backdrop-blur-sm p-16 text-center">
+          <p className="text-muted-foreground text-lg">No active hackathons at the moment. Check back soon!</p>
         </div>
       )}
     </div>

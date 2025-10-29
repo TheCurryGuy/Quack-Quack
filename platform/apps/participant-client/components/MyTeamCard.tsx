@@ -33,16 +33,16 @@ export default function MyTeamCard({
 
   return (
     <>
-      <Card className="border-primary/10 hover:border-primary/30 transition-colors">
-        <CardHeader className="pb-4">
+      <Card className="border-2 border-primary/30 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all hover:shadow-xl hover:shadow-primary/10">
+        <CardHeader className="pb-5">
           <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Users className="w-5 h-5 text-primary" />
+            <div className="flex items-center gap-4 flex-1 min-w-0">
+              <div className="shrink-0 w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
+                <Users className="w-6 h-6 text-primary" />
               </div>
               <div className="min-w-0">
-                <CardTitle className="text-lg truncate">{team.name}</CardTitle>
-                <p className="text-xs text-muted-foreground mt-1">
+                <CardTitle className="text-xl font-bold truncate">{team.name}</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1 font-medium">
                   {team.members.length} {team.members.length === 1 ? "member" : "members"}
                 </p>
               </div>
@@ -51,32 +51,32 @@ export default function MyTeamCard({
               variant="ghost"
               size="icon"
               onClick={() => setIsEditorOpen(true)}
-              className="shrink-0 hover:bg-primary/10"
+              className="shrink-0 hover:bg-primary/10 hover:text-primary h-10 w-10"
             >
-              <Pencil className="h-4 w-4" />
+              <Pencil className="h-5 w-5" />
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-5">
           {team.bio && (
-            <div className="p-3 rounded-lg bg-muted/50 border border-muted">
-              <p className="text-sm text-foreground italic">"{team.bio}"</p>
+            <div className="p-4 rounded-xl bg-muted/30 border-2 border-border/60">
+              <p className="text-base text-foreground italic leading-relaxed">"{team.bio}"</p>
             </div>
           )}
 
-          <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <span className="w-1 h-1 rounded-full bg-primary"></span>
+          <div className="space-y-4">
+            <h4 className="text-base font-bold text-foreground flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
               Team Members
             </h4>
             <div className="space-y-2">
               {team.members.map((member, index) => (
-                <div key={index} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                  <Avatar className="h-8 w-8 shrink-0">
+                <div key={index} className="flex items-center gap-4 p-3 rounded-xl hover:bg-muted/30 transition-colors border border-border/30">
+                  <Avatar className="h-10 w-10 shrink-0 border-2 border-border/60">
                     <AvatarImage src={member.image || ""} alt={member.name || "Member"} />
-                    <AvatarFallback className="text-xs">{member.name?.charAt(0) || "M"}</AvatarFallback>
+                    <AvatarFallback className="text-sm bg-primary/10 text-primary font-semibold">{member.name?.charAt(0) || "M"}</AvatarFallback>
                   </Avatar>
-                  <span className="text-sm font-medium text-foreground truncate">{member.name}</span>
+                  <span className="text-base font-semibold text-foreground truncate">{member.name}</span>
                 </div>
               ))}
             </div>

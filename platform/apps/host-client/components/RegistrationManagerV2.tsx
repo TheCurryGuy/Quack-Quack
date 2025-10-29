@@ -94,8 +94,8 @@ export default function RegistrationManagerV2({ hackathonId }: { hackathonId: st
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <Card className="border-0 shadow-lg">
-        <CardHeader className="pb-6 border-b">
+      <Card className="border-2 border-primary/30 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all">
+        <CardHeader className="pb-6 border-b border-border/40">
           <div className="flex items-center gap-2">
             <Users size={24} className="text-primary" />
             <div>
@@ -175,8 +175,8 @@ export default function RegistrationManagerV2({ hackathonId }: { hackathonId: st
         </CardContent>
       </Card>
 
-      <Card className="border-0 shadow-lg">
-        <CardHeader className="pb-6 border-b">
+      <Card className="border-2 border-accent/30 bg-card/50 backdrop-blur-sm hover:border-accent/50 transition-all">
+        <CardHeader className="pb-6 border-b border-border/40">
           <div className="flex items-center gap-2">
             <User size={24} className="text-primary" />
             <div>

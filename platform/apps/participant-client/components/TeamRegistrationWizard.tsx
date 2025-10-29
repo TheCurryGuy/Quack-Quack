@@ -118,7 +118,7 @@ export default function TeamRegistrationWizard({
             {members.map((member, index) => (
               <div
                 key={index}
-                className="p-4 border rounded-lg space-y-3 bg-card hover:border-primary/50 transition-colors relative"
+                className="p-4 border-2 border-primary/30 rounded-lg space-y-3 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-colors relative"
               >
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-semibold text-sm">Member {index + 1}</h4>

@@ -87,7 +87,7 @@ export default function WinnerAnnouncer({
 
   if (isLoading) {
     return (
-      <Card className="mt-8 border-slate-200 dark:border-slate-800">
+      <Card className="mt-8 border-2 border-primary/30 bg-card/50 backdrop-blur-sm">
         <CardContent className="flex items-center justify-center py-12">
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />
@@ -99,8 +99,8 @@ export default function WinnerAnnouncer({
   }
 
   return (
-    <Card className="mt-8 border-slate-200 dark:border-slate-800">
-      <CardHeader className="border-b border-slate-200 dark:border-slate-800">
+    <Card className="mt-8 border-2 border-accent/30 bg-card/50 backdrop-blur-sm hover:border-accent/50 transition-all">
+      <CardHeader className="border-b border-border/40">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
             <Trophy className="h-5 w-5 text-amber-600 dark:text-amber-400" />

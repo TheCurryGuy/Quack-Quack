@@ -42,96 +42,96 @@ export default function DashboardPage() {
   }, [])
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* Header Section */}
       <div>
-        <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-2">Welcome Back!</h1>
-        <p className="text-lg text-muted-foreground">Track your hackathon journey and discover new opportunities.</p>
+        <h1 className="text-5xl md:text-6xl font-extrabold text-foreground mb-3">Welcome Back!</h1>
+        <p className="text-xl text-muted-foreground">Track your hackathon journey and discover new opportunities.</p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-shadow">
+        <div className="bg-card/50 backdrop-blur-sm border-2 border-primary/30 rounded-xl p-7 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/50 transition-all">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-muted-foreground mb-1">Total Registered</p>
-              <p className="text-3xl font-bold text-foreground">{stats.totalRegistered}</p>
+              <p className="text-base font-semibold text-muted-foreground mb-2">Total Registered</p>
+              <p className="text-4xl font-bold text-foreground">{stats.totalRegistered}</p>
             </div>
-            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-              <span className="text-2xl">📋</span>
+            <div className="w-14 h-14 bg-primary/20 rounded-xl flex items-center justify-center">
+              <span className="text-3xl">📋</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-shadow">
+        <div className="bg-card/50 backdrop-blur-sm border-2 border-accent/30 rounded-xl p-7 hover:shadow-xl hover:shadow-accent/10 hover:border-accent/50 transition-all">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-muted-foreground mb-1">Active Events</p>
-              <p className="text-3xl font-bold text-foreground">{stats.activeEvents}</p>
+              <p className="text-base font-semibold text-muted-foreground mb-2">Active Events</p>
+              <p className="text-4xl font-bold text-foreground">{stats.activeEvents}</p>
             </div>
-            <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center">
-              <span className="text-2xl">🚀</span>
+            <div className="w-14 h-14 bg-accent/20 rounded-xl flex items-center justify-center">
+              <span className="text-3xl">🚀</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-shadow">
+        <div className="bg-card/50 backdrop-blur-sm border-2 border-chart-3/30 rounded-xl p-7 hover:shadow-xl hover:shadow-chart-3/10 hover:border-chart-3/50 transition-all">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-muted-foreground mb-1">Completed</p>
-              <p className="text-3xl font-bold text-foreground">{stats.completedEvents}</p>
+              <p className="text-base font-semibold text-muted-foreground mb-2">Completed</p>
+              <p className="text-4xl font-bold text-foreground">{stats.completedEvents}</p>
             </div>
-            <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center">
-              <span className="text-2xl">✅</span>
+            <div className="w-14 h-14 bg-chart-3/20 rounded-xl flex items-center justify-center">
+              <span className="text-3xl">✅</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Link
           href="/dashboard/explore"
-          className="bg-primary text-primary-foreground rounded-lg p-6 hover:shadow-lg transition-all hover:scale-105 active:scale-95"
+          className="bg-linear-to-br from-primary to-primary/80 text-primary-foreground rounded-xl p-8 hover:shadow-2xl hover:shadow-primary/30 transition-all hover:scale-[1.02] active:scale-95 border-2 border-primary/40"
         >
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold mb-1">Explore Events</h3>
-              <p className="text-sm opacity-90">Discover new hackathons to join</p>
+              <h3 className="text-2xl font-bold mb-2">Explore Events</h3>
+              <p className="text-base opacity-90">Discover new hackathons to join</p>
             </div>
-            <span className="text-2xl">🔍</span>
+            <span className="text-4xl">🔍</span>
           </div>
         </Link>
 
         <Link
           href="/dashboard/profile"
-          className="bg-secondary text-secondary-foreground rounded-lg p-6 hover:shadow-lg transition-all hover:scale-105 active:scale-95"
+          className="bg-linear-to-br from-secondary to-secondary/80 text-secondary-foreground rounded-xl p-8 hover:shadow-2xl hover:shadow-secondary/30 transition-all hover:scale-[1.02] active:scale-95 border-2 border-border/60"
         >
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold mb-1">View Profile</h3>
-              <p className="text-sm opacity-90">Update your information</p>
+              <h3 className="text-2xl font-bold mb-2">View Profile</h3>
+              <p className="text-base opacity-90">Update your information</p>
             </div>
-            <span className="text-2xl">👤</span>
+            <span className="text-4xl">👤</span>
           </div>
         </Link>
       </div>
 
       {/* Recent Hackathons Section */}
       <div>
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-2xl font-bold text-foreground">Recent Events</h2>
-            <p className="text-sm text-muted-foreground mt-1">Your latest registered hackathons</p>
+            <h2 className="text-3xl font-extrabold text-foreground">Recent Events</h2>
+            <p className="text-base text-muted-foreground mt-2">Your latest registered hackathons</p>
           </div>
-          <Link href="/dashboard/my-hackathons" className="text-primary hover:underline font-medium text-sm">
+          <Link href="/dashboard/my-hackathons" className="text-primary hover:text-primary/80 font-semibold text-base transition-colors">
             View All →
           </Link>
         </div>
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="flex items-center justify-center py-16">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
           </div>
         ) : recentHackathons.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -149,11 +149,11 @@ export default function DashboardPage() {
             ))}
           </div>
         ) : (
-          <div className="bg-card border border-border rounded-lg p-12 text-center">
-            <p className="text-muted-foreground mb-4">No hackathons registered yet</p>
+          <div className="bg-card/50 backdrop-blur-sm border-2 border-border/60 rounded-xl p-16 text-center">
+            <p className="text-muted-foreground mb-6 text-lg">No hackathons registered yet</p>
             <Link
               href="/dashboard/explore"
-              className="inline-block bg-primary text-primary-foreground px-6 py-2 rounded-lg hover:shadow-md transition-shadow"
+              className="inline-block bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 rounded-xl shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 transition-all font-semibold text-lg"
             >
               Explore Events
             </Link>

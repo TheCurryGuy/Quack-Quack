@@ -135,7 +135,7 @@ export default function SubmissionWizard({
 
               <div className="space-y-3">
                 <label className="text-sm font-semibold">Technologies Used</label>
-                <div className="border rounded-lg p-3 min-h-12 flex flex-wrap gap-2 items-start content-start bg-card">
+                <div className="border-2 border-accent/30 rounded-lg p-3 min-h-12 flex flex-wrap gap-2 items-start content-start bg-card/50 backdrop-blur-sm">
                   {techs.map((t) => (
                     <Badge key={t} variant="secondary" className="gap-1">
                       {t}
