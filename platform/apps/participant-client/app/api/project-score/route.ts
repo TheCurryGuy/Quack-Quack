@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
         }
         
         // 3. --- IMPORTANT: REPLACE WITH YOUR PROJECT SCORING AI'S ACTUAL API ENDPOINT ---
-        const externalApiUrl = 'https://your-ai-model-api.com/get-project-score';
+        const externalApiUrl = 'http://localhost:8000/model3/predict';
         // ---
 
         // 4. Make the call to your external AI service

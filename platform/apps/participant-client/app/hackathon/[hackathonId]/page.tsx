@@ -35,6 +35,20 @@ interface HackathonData {
   status: "UPCOMING" | "LIVE" | "ENDED"
 }
 
+interface TokenInfo {
+  token: string
+  memberName: string
+  memberEmail: string
+}
+
+interface TeamRegistrationResponse {
+  message: string
+  teamName: string
+  leaderName: string
+  leaderEmail: string
+  joinTokens: TokenInfo[]
+}
+
 export default function HackathonDetailPage() {
   const { hackathonId } = useParams()
   const { data: session } = useSession()
@@ -45,7 +59,7 @@ export default function HackathonDetailPage() {
   const [isIndividualWizardOpen, setIsIndividualWizardOpen] = useState(false)
   const [isTeamWizardOpen, setIsTeamWizardOpen] = useState(false)
   const [joinToken, setJoinToken] = useState("")
-  const [generatedTokens, setGeneratedTokens] = useState<string[]>([])
+  const [teamRegResponse, setTeamRegResponse] = useState<TeamRegistrationResponse | null>(null)
   const [isTokenModalOpen, setIsTokenModalOpen] = useState(false)
 
   useEffect(() => {
@@ -99,9 +113,9 @@ export default function HackathonDetailPage() {
     }
   }
 
-  const onTeamRegistrationComplete = (tokens: string[]) => {
+  const onTeamRegistrationComplete = (response: TeamRegistrationResponse) => {
     setIsTeamWizardOpen(false)
-    setGeneratedTokens(tokens)
+    setTeamRegResponse(response)
     setIsTokenModalOpen(true)
   }
 
@@ -238,18 +252,56 @@ export default function HackathonDetailPage() {
       )}
 
       <AlertDialog open={isTokenModalOpen} onOpenChange={setIsTokenModalOpen}>
-        <AlertDialogContent className="bg-card/95 backdrop-blur-sm border-border/50">
+        <AlertDialogContent className="bg-card/95 backdrop-blur-sm border-border/50 max-w-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Team Registration Initiated!</AlertDialogTitle>
-            <AlertDialogDescription>
-              Your spot is confirmed. Share these unique tokens with your teammates for them to join.
-              <div className="mt-4 space-y-2 p-3 bg-muted/30 rounded-lg border border-border/50">
-                {generatedTokens.map((token, i) => (
-                  <p key={i} className="font-mono text-sm break-all text-foreground">
-                    {token}
-                  </p>
-                ))}
-              </div>
+            <AlertDialogTitle className="text-2xl">Team Registration Successful! 🎉</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4">
+              {teamRegResponse && (
+                <>
+                  <div className="space-y-2">
+                    <p className="text-foreground font-semibold">Team: {teamRegResponse.teamName}</p>
+                    <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                      <p className="text-sm font-semibold text-green-700 dark:text-green-400">✓ Leader (Already Registered)</p>
+                      <p className="text-sm text-foreground mt-1">{teamRegResponse.leaderName}</p>
+                      <p className="text-xs text-muted-foreground">{teamRegResponse.leaderEmail}</p>
+                    </div>
+                  </div>
+                  
+                  {teamRegResponse.joinTokens.length > 0 && (
+                    <div className="space-y-3">
+                      <p className="text-sm font-semibold text-foreground">Share these tokens with your team members:</p>
+                      <div className="space-y-3">
+                        {teamRegResponse.joinTokens.map((tokenInfo, i) => (
+                          <div key={i} className="p-4 bg-muted/50 rounded-lg border border-border/50 space-y-2">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1">
+                                <p className="text-sm font-semibold text-foreground">{tokenInfo.memberName}</p>
+                                <p className="text-xs text-muted-foreground">{tokenInfo.memberEmail}</p>
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(tokenInfo.token)
+                                }}
+                                className="shrink-0"
+                              >
+                                Copy Token
+                              </Button>
+                            </div>
+                            <div className="p-2 bg-background/60 rounded border border-border/30">
+                              <p className="font-mono text-xs break-all text-foreground">{tokenInfo.token}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-3">
+                        💡 Each member should use their specific token to claim their spot on the team.
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <Button onClick={() => setIsTokenModalOpen(false)} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">

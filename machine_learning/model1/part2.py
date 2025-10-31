@@ -5,24 +5,35 @@ import argparse
 import os
 import sys
 from collections import defaultdict
+from itertools import combinations
 
 def form_teams_from_csv(csv_content: str, score_threshold: int = 300, chunk_size: int = 5) -> str:
     """
-    Forms teams of exactly `chunk_size` members (default 5) per group code.
+    Forms teams of exactly `chunk_size` members (default 5).
 
     Rules:
-    - Candidates are NOT filtered by any per-candidate threshold.
-    - Candidates are grouped by the first code in their Eligible_To.
-    - Teams are emitted only for full groups of `chunk_size` members whose
-      summed skill score is >= score_threshold (default 300).
-    - Partial groups (fewer than chunk_size members) are ignored (leftovers).
+    1. Form teams of `chunk_size` members with total score >= score_threshold
+    2. Validate that all members in the team have at least 1 common eligibility character
+    3. If validation fails, try to reform the team with different combinations
+    4. Each candidate can only be assigned to ONE team
     """
-    reader = csv.DictReader(io.StringIO(csv_content))
-    groups = defaultdict(list)
-    entries = {}  # key: name_lower -> {name, score, assigned_code, allocated}
+    # Auto-detect delimiter (tab, comma, etc.)
+    try:
+        sample = csv_content[:min(1024, len(csv_content))]
+        dialect = csv.Sniffer().sniff(sample)
+        reader = csv.DictReader(io.StringIO(csv_content), dialect=dialect)
+    except:
+        # Fallback to default (comma) if detection fails
+        reader = csv.DictReader(io.StringIO(csv_content))
+    
+    candidates = []  # List of all candidates with their data
+    entries = {}  # key: name_lower -> {name, score, eligibility_codes, allocated}
+
+    candidates = []  # List of all candidates with their data
+    entries = {}  # key: name_lower -> {name, score, eligibility_codes, allocated}
 
     for row in reader:
-        name = (row.get("Name") or row.get("name") or "").strip()
+        name = (row.get("id") or row.get("ID") or "").strip()
         if not name:
             continue
 
@@ -31,18 +42,18 @@ def form_teams_from_csv(csv_content: str, score_threshold: int = 300, chunk_size
         if name_key in entries:
             continue
 
-        score_raw = (row.get("Skill_Score") or row.get("skill_score") or row.get("score") or "").strip()
+        score_raw = (row.get("profilescore") or row.get("profileScore") or row.get("score") or "").strip()
         try:
             score = float(score_raw)
         except (ValueError, TypeError):
-            # invalid score: record but don't add to groups
-            entries[name_key] = {"name": name, "score": None, "assigned_code": None, "allocated": False}
+            # invalid score: record but don't add to candidates
+            entries[name_key] = {"name": name, "score": None, "eligibility_codes": set(), "allocated": False}
             continue
 
-        eligible_raw = (row.get("Eligible_To") or row.get("eligible_to") or row.get("Eligible") or "").strip()
+        eligible_raw = (row.get("eligibility") or row.get("Eligibility") or row.get("Eligible") or "").strip()
         if not eligible_raw:
             # has score but no eligible group -> leftover
-            entries[name_key] = {"name": name, "score": score, "assigned_code": None, "allocated": False}
+            entries[name_key] = {"name": name, "score": score, "eligibility_codes": set(), "allocated": False}
             continue
 
         # split eligible codes: allow comma/semicolon/pipe/space, otherwise treat as sequence of letters
@@ -58,49 +69,110 @@ def form_teams_from_csv(csv_content: str, score_threshold: int = 300, chunk_size
             codes = list(eligible_raw)
 
         if not codes:
-            entries[name_key] = {"name": name, "score": score, "assigned_code": None, "allocated": False}
+            entries[name_key] = {"name": name, "score": score, "eligibility_codes": set(), "allocated": False}
             continue
 
-        assigned_code = codes[0].strip().lower()
-        if not assigned_code:
-            entries[name_key] = {"name": name, "score": score, "assigned_code": None, "allocated": False}
+        # Store eligibility as a set of lowercase characters
+        eligibility_codes = {c.strip().lower() for c in codes if c.strip()}
+        if not eligibility_codes:
+            entries[name_key] = {"name": name, "score": score, "eligibility_codes": set(), "allocated": False}
             continue
 
-        groups[assigned_code].append({"name": name, "score": score})
-        entries[name_key] = {"name": name, "score": score, "assigned_code": assigned_code, "allocated": False}
+        candidates.append({"name": name, "score": score, "eligibility_codes": eligibility_codes})
+        entries[name_key] = {"name": name, "score": score, "eligibility_codes": eligibility_codes, "allocated": False}
 
-    # create teams of exactly chunk_size and mark allocated members only if group sum >= threshold
+    # Helper function to check if a group has at least one common eligibility character
+    def has_common_eligibility(team_members):
+        if not team_members:
+            return False
+        # Find intersection of all eligibility sets
+        common = set(team_members[0]["eligibility_codes"])
+        for member in team_members[1:]:
+            common &= member["eligibility_codes"]
+        return len(common) > 0
+    
+    def get_common_code(team_members):
+        """Get the first common eligibility code alphabetically"""
+        if not team_members:
+            return "X"
+        common = set(team_members[0]["eligibility_codes"])
+        for member in team_members[1:]:
+            common &= member["eligibility_codes"]
+        return sorted(common)[0].upper() if common else "X"
+
+    # Sort candidates by score (descending) to prioritize high scorers
+    candidates.sort(key=lambda c: c["score"], reverse=True)
+
+    # Greedy team formation with combination search
     team_rows = []
-    for code in sorted(groups.keys()):
-        members = groups[code]
-        if not members:
-            continue
-        members.sort(key=lambda m: m["score"] if m["score"] is not None else -1, reverse=True)
+    allocated_names = set()
+    team_counter = 1
 
-        team_num = 1
-        for i in range(0, len(members), chunk_size):
-            chunk = members[i:i + chunk_size]
-            # Only consider full chunks of exactly chunk_size
-            if len(chunk) != chunk_size:
-                continue
-            # compute total score for the chunk
-            total = sum(m["score"] for m in chunk if isinstance(m.get("score"), (int, float)))
-            if total >= score_threshold:
-                names = "  ".join(m["name"] for m in chunk)
-                # format scores with no unnecessary decimals
-                scores = "  ".join(str(int(s["score"])) if float(s["score"]).is_integer() else f"{s['score']:.2f}" for s in chunk)
-                team_rows.append({
-                    "team_id": f"Team_{code.upper()}{team_num}",
-                    "participant_names": names,
-                    "score_list": scores
-                })
-                # mark allocated
-                for m in chunk:
-                    entries[m["name"].lower()]["allocated"] = True
-                team_num += 1
-            else:
-                # do not allocate these members; they remain leftovers
-                continue
+    while True:
+        # Get available candidates
+        available = [c for c in candidates if c["name"].lower() not in allocated_names]
+        
+        if len(available) < chunk_size:
+            # Not enough candidates left to form a team
+            break
+        
+        # Try to form a valid team from available candidates
+        team_formed = False
+        best_team = None
+        best_score = 0
+        
+        # Strategy 1: First try consecutive candidates (faster)
+        for start_idx in range(len(available) - chunk_size + 1):
+            team_candidate = available[start_idx:start_idx + chunk_size]
+            total_score = sum(m["score"] for m in team_candidate)
+            
+            if total_score >= score_threshold and has_common_eligibility(team_candidate):
+                # Valid consecutive team found - use it immediately
+                best_team = team_candidate
+                best_score = total_score
+                team_formed = True
+                break
+        
+        # Strategy 2: If no consecutive team found, try all combinations
+        # (This is more expensive but finds non-consecutive matches)
+        if not team_formed and len(available) <= 15:  # Limit to avoid exponential explosion
+            for combo in combinations(available, chunk_size):
+                team_candidate = list(combo)
+                total_score = sum(m["score"] for m in team_candidate)
+                
+                if total_score >= score_threshold and has_common_eligibility(team_candidate):
+                    # Found a valid combination
+                    if total_score > best_score:
+                        best_team = team_candidate
+                        best_score = total_score
+                        team_formed = True
+        
+        if team_formed and best_team:
+            # Add the best team found
+            team_code = get_common_code(best_team)
+            
+            names = "  ".join(m["name"] for m in best_team)
+            scores = "  ".join(
+                str(int(s["score"])) if float(s["score"]).is_integer() else f"{s['score']:.2f}" 
+                for s in best_team
+            )
+            
+            team_rows.append({
+                "team_id": f"Team_{team_code}{team_counter}",
+                "participant_names": names,
+                "score_list": scores
+            })
+            
+            # Mark members as allocated
+            for m in best_team:
+                name_lower = m["name"].lower()
+                allocated_names.add(name_lower)
+                entries[name_lower]["allocated"] = True
+            
+            team_counter += 1
+        else:
+            # Couldn't form any valid team from remaining candidates
+            break
 
     out = io.StringIO()
     writer = csv.DictWriter(out, fieldnames=["team_id", "participant_names", "score_list"])

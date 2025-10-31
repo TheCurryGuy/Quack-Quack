@@ -37,6 +37,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ hac
         const csvText = await file.text();
         const parsed = Papa.parse<FormedTeamRow>(csvText, { header: true, skipEmptyLines: true });
         
+        let teamsCreated = 0;
+        let teamsSkipped = 0;
+        const skippedTeams: string[] = [];
+        
         for (const row of parsed.data) {
             const memberEmails = row.members_emails.split(',').map(email => email.trim());
             
@@ -47,8 +51,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ hac
 
             // Ensure all users were found
             if (users.length !== memberEmails.length) {
-                console.warn(`Skipping team "${row.team_name}" due to missing users.`);
-                continue; // Or throw an error if you want to be stricter
+                const foundEmails = new Set(users.map(u => u.email));
+                const missingEmails = memberEmails.filter(email => !foundEmails.has(email));
+                console.warn(`⚠️  Skipping team "${row.team_name}" - missing users: ${missingEmails.join(', ')}`);
+                teamsSkipped++;
+                skippedTeams.push(`${row.team_name} (missing: ${missingEmails.join(', ')})`);
+                continue;
             }
 
             // Create the new team and its members in a single transaction
@@ -61,9 +69,19 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ hac
                     }
                 }
             });
+            teamsCreated++;
         }
         
-        return NextResponse.json({ message: 'Teams registered successfully.' }, { status: 200 });
+        const message = teamsSkipped > 0 
+            ? `Teams registered: ${teamsCreated} created, ${teamsSkipped} skipped (users not found)`
+            : `All ${teamsCreated} teams registered successfully.`;
+        
+        return NextResponse.json({ 
+            message, 
+            teamsCreated, 
+            teamsSkipped,
+            skippedTeams: teamsSkipped > 0 ? skippedTeams : undefined
+        }, { status: 200 });
 
     } catch (error) {
         console.error('Error registering formed teams:', error);

@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
         externalApiFormData.append('each_room_capacity', roomCapacity);
         
         // --- IMPORTANT: REPLACE WITH YOUR ROOM ALLOCATION AI'S API ENDPOINT ---
-        const externalApiUrl = 'https://your-ai-model-api.com/allocate-rooms';
+        const externalApiUrl = 'http://localhost:8000/model2/upload';
         // ---
 
         const responseFromAi = await axios.post(externalApiUrl, externalApiFormData, {

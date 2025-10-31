@@ -42,24 +42,31 @@ def evaluate_candidate_api(data: CandidateInput):
 
     cleaned_stack = data.tech_stack_used.replace("  ", ",").replace(" ,", ",").strip()
     skills = [s.strip() for s in cleaned_stack.split(",") if s.strip()]
-
-    name, score, eligible_to = evaluate_candidate(data.name, skills)
-
+    print(data.name)
+    print(skills)
+    print(data.tech_stack_used)
+    name, total_score, eligible_to = evaluate_candidate(data.name, skills)
+    print(f"Evaluated candidate: {name}, Score: {total_score}, Eligible To: {eligible_to}")
+   
     return {
         "name": name,
-        "score": score,
+        "score": total_score,
         "eligible_to": eligible_to
     }
 
 ## --- Endpoint 2: Form Teams ---
 @app.post("/model1/form_teams", response_class=FileResponse)
-async def form_teams(file: UploadFile = File(...)):
+async def form_teams(
+    file: UploadFile = File(...),
+    score_threshold: int = Query(300, description="Minimum team score threshold"),
+    chunk_size: int = Query(5, description="Exact team size (number of members per team)")
+):
     
 
     content = await file.read()
     csv_content = content.decode("utf-8")
 
-    teams_csv = form_teams_from_csv(csv_content)
+    teams_csv = form_teams_from_csv(csv_content, score_threshold=score_threshold, chunk_size=chunk_size)
 
     os.makedirs("outputs", exist_ok=True)
     file_path = "outputs/teams.csv"
