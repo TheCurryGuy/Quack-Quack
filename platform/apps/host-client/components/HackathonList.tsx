@@ -86,7 +86,7 @@ export default function HackathonList() {
       </div>
 
       {hackathons.length === 0 ? (
-        <Card className="border-dashed">
+        <Card className="border-2 border-dashed border-border/50 bg-card/50">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Users size={48} className="text-muted-foreground mb-4" />
             <p className="text-lg font-medium">No hackathons yet</p>
@@ -98,7 +98,7 @@ export default function HackathonList() {
           {hackathons.map((hackathon) => (
             <Card
               key={hackathon.id}
-              className="flex flex-col justify-between hover:shadow-lg transition-shadow border-0 shadow-md"
+              className="flex flex-col justify-between border-2 border-border/50 bg-muted/30 backdrop-blur-sm hover:bg-muted/50 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/20 transition-all hover:scale-[1.02]"
             >
               <div>
                 <CardHeader className="pb-4">
@@ -142,7 +142,7 @@ export default function HackathonList() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-full gap-2 bg-transparent"
+                  className="w-full gap-2 bg-black text-white border-2 border-border/50 hover:bg-white hover:text-black hover:border-white transition-all"
                   onClick={() => handleDownloadTeamNames(hackathon.id)}
                 >
                   <Download size={14} /> Team Names

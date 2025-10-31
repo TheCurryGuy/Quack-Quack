@@ -73,14 +73,14 @@ export default function ParticipantHackathonPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     )
   }
 
   if (!hackathon) {
     return (
-      <div className="rounded-lg border border-border bg-card p-8 text-center">
+      <div className="rounded-lg border-2 border-border/60 bg-card/50 backdrop-blur-sm p-8 text-center">
         <p className="text-muted-foreground">Could not load hackathon details.</p>
       </div>
     )
@@ -89,7 +89,7 @@ export default function ParticipantHackathonPage() {
   return (
     <div className="space-y-8">
       {/* Banner */}
-      <div className="relative w-full h-64 md:h-80 rounded-xl overflow-hidden border border-border shadow-lg">
+      <div className="relative w-full h-64 md:h-80 rounded-xl overflow-hidden border border-border/50 shadow-xl shadow-primary/5">
         <Image
           src={hackathon.bannerUrl || "/placeholder.svg"}
           alt={`${hackathon.name} banner`}
@@ -110,7 +110,7 @@ export default function ParticipantHackathonPage() {
           />
 
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold">Your Dashboard</h2>
+            <h2 className="text-2xl font-bold text-foreground">Your Dashboard</h2>
           </div>
 
           <StatusCard status={statusData?.registrationStatus || null} />
@@ -133,10 +133,10 @@ export default function ParticipantHackathonPage() {
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between gap-4">
             <div className="space-y-2">
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tight">{hackathon.name}</h1>
+              <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">{hackathon.name}</h1>
             </div>
             <Link href={`/hackathon/${hackathon.id}`} target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="sm" className="gap-2 bg-transparent">
+              <Button variant="outline" size="sm" className="gap-2 bg-transparent border-border/50 hover:bg-primary/10 hover:border-primary/50">
                 <ExternalLink className="h-4 w-4" />
                 Public Page
               </Button>

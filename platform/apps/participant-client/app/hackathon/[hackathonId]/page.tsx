@@ -35,6 +35,20 @@ interface HackathonData {
   status: "UPCOMING" | "LIVE" | "ENDED"
 }
 
+interface TokenInfo {
+  token: string
+  memberName: string
+  memberEmail: string
+}
+
+interface TeamRegistrationResponse {
+  message: string
+  teamName: string
+  leaderName: string
+  leaderEmail: string
+  joinTokens: TokenInfo[]
+}
+
 export default function HackathonDetailPage() {
   const { hackathonId } = useParams()
   const { data: session } = useSession()
@@ -45,7 +59,7 @@ export default function HackathonDetailPage() {
   const [isIndividualWizardOpen, setIsIndividualWizardOpen] = useState(false)
   const [isTeamWizardOpen, setIsTeamWizardOpen] = useState(false)
   const [joinToken, setJoinToken] = useState("")
-  const [generatedTokens, setGeneratedTokens] = useState<string[]>([])
+  const [teamRegResponse, setTeamRegResponse] = useState<TeamRegistrationResponse | null>(null)
   const [isTokenModalOpen, setIsTokenModalOpen] = useState(false)
 
   useEffect(() => {
@@ -99,9 +113,9 @@ export default function HackathonDetailPage() {
     }
   }
 
-  const onTeamRegistrationComplete = (tokens: string[]) => {
+  const onTeamRegistrationComplete = (response: TeamRegistrationResponse) => {
     setIsTeamWizardOpen(false)
-    setGeneratedTokens(tokens)
+    setTeamRegResponse(response)
     setIsTokenModalOpen(true)
   }
 
@@ -109,7 +123,7 @@ export default function HackathonDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     )
   }
@@ -117,7 +131,7 @@ export default function HackathonDetailPage() {
   if (error) {
     return (
       <div className="container mx-auto max-w-5xl p-4">
-        <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-8 text-center">
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 backdrop-blur-sm p-8 text-center">
           <p className="text-destructive font-medium">{error}</p>
         </div>
       </div>
@@ -129,9 +143,9 @@ export default function HackathonDetailPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-5xl space-y-8">
+    <div className="container mx-auto max-w-5xl space-y-8 py-8">
       {/* Banner */}
-      <div className="relative w-full h-64 md:h-80 rounded-xl overflow-hidden border border-border shadow-lg">
+      <div className="relative w-full h-64 md:h-80 rounded-xl overflow-hidden border border-border/50 shadow-xl shadow-primary/5">
         <Image
           src={hackathon.bannerUrl || "/placeholder.svg"}
           alt={`${hackathon.name} banner`}
@@ -145,7 +159,7 @@ export default function HackathonDetailPage() {
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           <div className="space-y-3">
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight">{hackathon.name}</h1>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">{hackathon.name}</h1>
           </div>
           <article className="prose dark:prose-invert max-w-none">
             <ReactMarkdown>{hackathon.body}</ReactMarkdown>
@@ -155,7 +169,7 @@ export default function HackathonDetailPage() {
         {/* Sidebar */}
         <div className="lg:col-span-1 space-y-6">
           {/* Info Card */}
-          <Card>
+          <Card className="bg-card/50 backdrop-blur-sm border-2 border-primary/30 hover:border-primary/50 transition-all">
             <CardHeader>
               <CardTitle className="text-lg">Event Details</CardTitle>
             </CardHeader>
@@ -173,12 +187,12 @@ export default function HackathonDetailPage() {
 
           {/* Registration Card */}
           {hackathon.isRegistrationOpen && hackathon.status !== "ENDED" ? (
-            <Card>
+            <Card className="bg-card/50 backdrop-blur-sm border-2 border-accent/30 hover:border-accent/50 transition-all">
               <CardHeader>
                 <CardTitle className="text-lg">Join the Challenge</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Button className="w-full" size="lg" onClick={handleIndividualRegisterClick}>
+                <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20" size="lg" onClick={handleIndividualRegisterClick}>
                   Register as Individual
                 </Button>
                 <Button className="w-full" size="lg" variant="secondary" onClick={handleTeamRegisterClick}>
@@ -187,7 +201,7 @@ export default function HackathonDetailPage() {
 
                 <div className="relative my-4">
                   <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-border" />
+                    <span className="w-full border-t border-border/50" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
                     <span className="bg-card px-2 text-muted-foreground">Or</span>
@@ -199,16 +213,16 @@ export default function HackathonDetailPage() {
                     placeholder="Enter team join token..."
                     value={joinToken}
                     onChange={(e) => setJoinToken(e.target.value)}
-                    className="flex-1"
+                    className="flex-1 bg-background/50 border-border/50"
                   />
-                  <Button onClick={handleJoinTeam} variant="outline">
+                  <Button onClick={handleJoinTeam} variant="outline" className="border-border/50 hover:bg-primary/10 hover:border-primary/50">
                     Join
                   </Button>
                 </div>
               </CardContent>
             </Card>
           ) : (
-            <Card>
+            <Card className="bg-card/50 backdrop-blur-sm border-2 border-border/60">
               <CardContent className="pt-6">
                 <p className="text-center text-muted-foreground font-medium">
                   Registration for this event is now closed.
@@ -238,21 +252,59 @@ export default function HackathonDetailPage() {
       )}
 
       <AlertDialog open={isTokenModalOpen} onOpenChange={setIsTokenModalOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-card/95 backdrop-blur-sm border-border/50 max-w-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Team Registration Initiated!</AlertDialogTitle>
-            <AlertDialogDescription>
-              Your spot is confirmed. Share these unique tokens with your teammates for them to join.
-              <div className="mt-4 space-y-2 p-3 bg-muted rounded-lg border border-border">
-                {generatedTokens.map((token, i) => (
-                  <p key={i} className="font-mono text-sm break-all text-foreground">
-                    {token}
-                  </p>
-                ))}
-              </div>
+            <AlertDialogTitle className="text-2xl">Team Registration Successful! 🎉</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4">
+              {teamRegResponse && (
+                <>
+                  <div className="space-y-2">
+                    <p className="text-foreground font-semibold">Team: {teamRegResponse.teamName}</p>
+                    <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                      <p className="text-sm font-semibold text-green-700 dark:text-green-400">✓ Leader (Already Registered)</p>
+                      <p className="text-sm text-foreground mt-1">{teamRegResponse.leaderName}</p>
+                      <p className="text-xs text-muted-foreground">{teamRegResponse.leaderEmail}</p>
+                    </div>
+                  </div>
+                  
+                  {teamRegResponse.joinTokens.length > 0 && (
+                    <div className="space-y-3">
+                      <p className="text-sm font-semibold text-foreground">Share these tokens with your team members:</p>
+                      <div className="space-y-3">
+                        {teamRegResponse.joinTokens.map((tokenInfo, i) => (
+                          <div key={i} className="p-4 bg-muted/50 rounded-lg border border-border/50 space-y-2">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1">
+                                <p className="text-sm font-semibold text-foreground">{tokenInfo.memberName}</p>
+                                <p className="text-xs text-muted-foreground">{tokenInfo.memberEmail}</p>
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(tokenInfo.token)
+                                }}
+                                className="shrink-0"
+                              >
+                                Copy Token
+                              </Button>
+                            </div>
+                            <div className="p-2 bg-background/60 rounded border border-border/30">
+                              <p className="font-mono text-xs break-all text-foreground">{tokenInfo.token}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-3">
+                        💡 Each member should use their specific token to claim their spot on the team.
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <Button onClick={() => setIsTokenModalOpen(false)} className="w-full">
+          <Button onClick={() => setIsTokenModalOpen(false)} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
             Close
           </Button>
         </AlertDialogContent>

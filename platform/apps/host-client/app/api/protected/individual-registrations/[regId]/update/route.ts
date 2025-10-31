@@ -38,6 +38,13 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ regI
             return NextResponse.json({ message: 'Registration not found or access denied.' }, { status: 404 });
         }
 
+        // Prevent duplicate approvals - check if already processed
+        if (registration.status !== 'PENDING') {
+            return NextResponse.json({ 
+                message: `This registration has already been ${registration.status.toLowerCase()}.` 
+            }, { status: 409 });
+        }
+
         // Update the status in the database
         await prismaClient.individualRegistration.update({
             where: { id: regId },

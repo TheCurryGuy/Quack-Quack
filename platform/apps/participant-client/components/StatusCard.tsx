@@ -11,26 +11,29 @@ interface StatusCardProps {
 export default function StatusCard({ status }: StatusCardProps) {
   const statusConfig = {
     PENDING: {
-      icon: <HelpCircle className="h-10 w-10 text-yellow-500" />,
+      icon: <HelpCircle className="h-12 w-12 text-chart-2" />,
       title: "Application Pending",
       description: "Your application is under review by the hackathon organizers. Check back soon for an update!",
-      badge: <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">Pending</Badge>,
-      bgColor: "bg-yellow-50 dark:bg-yellow-950/20",
+      badge: <Badge className="bg-chart-2/20 text-chart-2 hover:bg-chart-2/30 border-2 border-chart-2/40 text-sm font-semibold px-3 py-1">Pending</Badge>,
+      bgColor: "bg-chart-2/10 border-2 border-chart-2/30",
+      borderColor: "border-l-chart-2",
     },
     APPROVED: {
-      icon: <CheckCircle2 className="h-10 w-10 text-green-500" />,
+      icon: <CheckCircle2 className="h-12 w-12 text-chart-4" />,
       title: "You're In!",
       description: "Congratulations! Your application has been approved. Get ready to build something amazing.",
-      badge: <Badge className="bg-green-100 text-green-800 hover:bg-green-200">Approved</Badge>,
-      bgColor: "bg-green-50 dark:bg-green-950/20",
+      badge: <Badge className="bg-chart-4/20 text-chart-4 hover:bg-chart-4/30 border-2 border-chart-4/40 text-sm font-semibold px-3 py-1">Approved</Badge>,
+      bgColor: "bg-chart-4/10 border-2 border-chart-4/30",
+      borderColor: "border-l-chart-4",
     },
     REJECTED: {
-      icon: <XCircle className="h-10 w-10 text-red-500" />,
+      icon: <XCircle className="h-12 w-12 text-destructive" />,
       title: "Application Update",
       description:
         "Unfortunately, we were unable to offer you a spot at this time. We encourage you to apply for future events!",
-      badge: <Badge className="bg-red-100 text-red-800 hover:bg-red-200">Rejected</Badge>,
-      bgColor: "bg-red-50 dark:bg-red-950/20",
+      badge: <Badge className="bg-destructive/20 text-destructive hover:bg-destructive/30 border-2 border-destructive/40 text-sm font-semibold px-3 py-1">Rejected</Badge>,
+      bgColor: "bg-destructive/10 border-2 border-destructive/30",
+      borderColor: "border-l-destructive",
     },
   }
 
@@ -39,20 +42,20 @@ export default function StatusCard({ status }: StatusCardProps) {
 
   return (
     <Card
-      className={`border-l-4 ${status === "PENDING" ? "border-l-yellow-500" : status === "APPROVED" ? "border-l-green-500" : "border-l-red-500"}`}
+      className={`border-l-4 ${config.borderColor} bg-card/50 backdrop-blur-sm border-2`}
     >
-      <CardHeader className="pb-3">
-        <CardTitle className="flex justify-between items-center text-lg">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex justify-between items-center text-xl font-bold">
           <span>Your Status</span>
           {config.badge}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className={`rounded-lg p-4 ${config.bgColor} flex items-start gap-4`}>
+        <div className={`rounded-xl p-5 ${config.bgColor} flex items-start gap-5`}>
           <div className="shrink-0 pt-1">{config.icon}</div>
           <div className="flex-1">
-            <h3 className="font-semibold text-base mb-1">{config.title}</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{config.description}</p>
+            <h3 className="font-bold text-lg mb-2 text-foreground">{config.title}</h3>
+            <p className="text-base text-muted-foreground leading-relaxed">{config.description}</p>
           </div>
         </div>
       </CardContent>

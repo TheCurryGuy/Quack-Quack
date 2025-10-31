@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
         externalApiFormData.append('file', file);
         
         // --- IMPORTANT: REPLACE WITH YOUR TEAM FORMATION AI'S API ENDPOINT ---
-        const externalApiUrl = 'https://your-ai-model-api.com/form-teams-by-id';
+        const externalApiUrl = 'http://localhost:8000/model1/form_teams';
         // ---
 
         const responseFromAi = await axios.post(externalApiUrl, externalApiFormData, {

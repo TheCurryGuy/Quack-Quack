@@ -13,12 +13,13 @@
     "db:migrate": "prisma migrate dev"
   },
   "exports": {
-    "./client":"./index.ts"
+    "./client": "./index.ts"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "dependencies": {
-    "prisma": "^6.17.1"
+    "@prisma/client": "^6.18.0",
+    "prisma": "^6.18.0"
   }
 }

@@ -117,11 +117,11 @@ export default function RegistrationManager({ hackathonId, isRegistrationOpen }:
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
-                <Card>
+                <Card className="border-2 border-primary/30 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all">
                     <CardHeader><CardTitle>Pending Team Applications ({teams.length})</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
                         {teams.length > 0 ? teams.map(reg => (
-                            <div key={reg.id} className="p-4 border rounded-md">
+                            <div key={reg.id} className="p-4 border-2 border-border/60 rounded-md bg-muted/30">
                                 <h3 className="font-bold text-lg">{reg.teamName}</h3>
                                 <ul className="list-disc pl-5 mt-2">
                                     {reg.participants.map(p => <li key={p.user.id}>{p.user.name} ({p.user.email})</li>)}
@@ -134,11 +134,11 @@ export default function RegistrationManager({ hackathonId, isRegistrationOpen }:
                         )) : <p>No pending team applications.</p>}
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="border-2 border-accent/30 bg-card/50 backdrop-blur-sm hover:border-accent/50 transition-all">
                     <CardHeader><CardTitle>Pending Individual Applications ({individuals.length})</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
                         {individuals.length > 0 ? individuals.map(reg => (
-                            <div key={reg.id} className="p-4 border rounded-md">
+                            <div key={reg.id} className="p-4 border-2 border-border/60 rounded-md bg-muted/30">
                                 <h3 className="font-bold text-lg">{reg.participants[0]?.user.name}</h3>
                                 <p className="text-sm text-gray-500">{reg.participants[0]?.user.email}</p>
                                 <a href={reg.participants[0]?.githubUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-500 hover:underline">GitHub Profile</a>

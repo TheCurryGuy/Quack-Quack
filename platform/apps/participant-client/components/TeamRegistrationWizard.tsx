@@ -24,6 +24,20 @@ interface MemberData {
   year: number
 }
 
+interface TokenInfo {
+  token: string
+  memberName: string
+  memberEmail: string
+}
+
+interface TeamRegistrationResponse {
+  message: string
+  teamName: string
+  leaderName: string
+  leaderEmail: string
+  joinTokens: TokenInfo[]
+}
+
 export default function TeamRegistrationWizard({
   hackathonId,
   teamSize,
@@ -35,7 +49,7 @@ export default function TeamRegistrationWizard({
   teamSize: number
   open: boolean
   onOpenChange: (open: boolean) => void
-  onRegistrationComplete: (tokens: string[]) => void
+  onRegistrationComplete: (response: TeamRegistrationResponse) => void
 }) {
   const [teamName, setTeamName] = useState("")
   const [members, setMembers] = useState<MemberData[]>([
@@ -73,7 +87,7 @@ export default function TeamRegistrationWizard({
         teamName: teamName,
         members: members,
       })
-      onRegistrationComplete(response.data.joinTokens)
+      onRegistrationComplete(response.data)
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to register team.")
     } finally {
@@ -118,7 +132,7 @@ export default function TeamRegistrationWizard({
             {members.map((member, index) => (
               <div
                 key={index}
-                className="p-4 border rounded-lg space-y-3 bg-card hover:border-primary/50 transition-colors relative"
+                className="p-4 border-2 border-primary/30 rounded-lg space-y-3 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-colors relative"
               >
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-semibold text-sm">Member {index + 1}</h4>

@@ -20,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body className={`${geistSans.className} ${geistMono.variable} bg-background text-foreground`}>
         <AuthProvider>{children}</AuthProvider>
       </body>

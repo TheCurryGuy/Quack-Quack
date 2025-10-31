@@ -37,7 +37,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ hac
             return NextResponse.json({ message: 'The first member must be the currently logged-in user.' }, { status: 403 });
         }
 
-        const joinTokens: string[] = [];
+        interface TokenInfo {
+            token: string;
+            memberName: string;
+            memberEmail: string;
+        }
+        
+        const joinTokens: TokenInfo[] = [];
         
         await prismaClient.$transaction(async (tx) => {
             // 1. Create the main Team Registration record
@@ -52,12 +58,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ hac
 
             // 2. Create a PendingTeamMember for each person
             for (const member of members) {
-                const token = randomBytes(16).toString('hex');
-                
                 // The leader is pre-claimed. Other members need the token.
                 const isLeader = member.email === leaderData.email;
+                
+                const token = randomBytes(16).toString('hex');
+                
+                // Only add token to the response if it's not the leader
                 if (!isLeader) {
-                    joinTokens.push(token);
+                    joinTokens.push({
+                        token,
+                        memberName: member.name,
+                        memberEmail: member.email
+                    });
                 }
 
                 await tx.pendingTeamMember.create({
@@ -76,7 +88,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ hac
             }
         });
 
-        return NextResponse.json({ message: 'Team registration initiated!', joinTokens }, { status: 201 });
+        return NextResponse.json({ 
+            message: 'Team registration initiated!', 
+            teamName,
+            leaderName: leaderData.name,
+            leaderEmail: leaderData.email,
+            joinTokens 
+        }, { status: 201 });
 
     } catch (error) {
         if (

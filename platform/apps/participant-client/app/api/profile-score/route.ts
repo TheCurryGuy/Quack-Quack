@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
         }
         
         // 3. --- IMPORTANT: REPLACE WITH YOUR AI MODEL'S ACTUAL API ENDPOINT ---
-        const externalApiUrl = 'https://your-ai-model-api.com/get-profile-score';
+        const externalApiUrl = 'http://localhost:8000/model1/evaluate';
         // ---
 
         // 4. Make the call to your external AI service
@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
 
         // 6. Securely return the data from your AI service to our frontend
         // We are assuming your API returns a body like: { name: "...", score: 82, eligible_to: "..." }
+        console.log('Profile score response:', responseFromAi.data);
         return NextResponse.json(responseFromAi.data, { status: 200 });
 
     } catch (error: unknown) {

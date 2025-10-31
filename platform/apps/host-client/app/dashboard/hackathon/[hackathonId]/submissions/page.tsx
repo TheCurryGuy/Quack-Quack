@@ -94,7 +94,7 @@ export default function ViewSubmissionsPage() {
         </Button>
       </div>
 
-      <Card className="border-border bg-card">
+      <Card className="border-2 border-primary/30 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all">
         <CardHeader>
           <CardTitle>Review Projects</CardTitle>
           <CardDescription>

@@ -36,7 +36,7 @@ export default function PublicProjectPage() {
   if (!project) {
     return (
       <div className="container mx-auto max-w-4xl p-4">
-        <div className="rounded-lg border border-border bg-card p-8 text-center">
+        <div className="rounded-lg border-2 border-border/60 bg-card/50 backdrop-blur-sm p-8 text-center">
           <p className="text-muted-foreground">Project not found.</p>
         </div>
       </div>

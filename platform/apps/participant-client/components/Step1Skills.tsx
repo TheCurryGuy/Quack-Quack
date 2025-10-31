@@ -50,7 +50,7 @@ export default function Step1Skills({ onNext }: { onNext: (data: any, scoreData:
     setIsLoading(true)
     setError(null)
     try {
-      const tech_stack_used = selectedSkills.join(" ")
+      const tech_stack_used = selectedSkills.join("  ")
 
       const response = await axios.post("/api/profile-score", {
         name: name,

@@ -37,8 +37,25 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ regI
             return NextResponse.json({ message: 'Team registration not found or access denied.' }, { status: 404 });
         }
         
+        // Prevent duplicate approvals - check if already processed
+        if (teamRegistration.status !== 'PENDING') {
+            return NextResponse.json({ 
+                message: `This registration has already been ${teamRegistration.status.toLowerCase()}.` 
+            }, { status: 409 });
+        }
+        
         // Use a transaction for the database operations
         await prismaClient.$transaction(async (tx) => {
+            // Double-check status inside transaction to prevent race conditions
+            const currentReg = await tx.teamRegistration.findUnique({
+                where: { id: regId },
+                select: { status: true }
+            });
+            
+            if (!currentReg || currentReg.status !== 'PENDING') {
+                throw new Error('Registration already processed');
+            }
+            
             await tx.teamRegistration.update({
                 where: { id: regId },
                 data: { status: status }
@@ -57,12 +74,29 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ regI
                 const claimedMembers = teamRegistration.pendingMembers.filter(m => m.claimedByUserId !== null);
 
                 if (claimedMembers.length > 0) {
-                    await tx.teamMember.createMany({
-                        data: claimedMembers.map(m => ({
-                            teamId: newTeam.id,
-                            userId: m.claimedByUserId!,
-                        }))
+                    // Verify all claimed user IDs exist in the User table
+                    const userIds = claimedMembers.map(m => m.claimedByUserId!);
+                    const existingUsers = await tx.user.findMany({
+                        where: { id: { in: userIds } },
+                        select: { id: true }
                     });
+                    
+                    const existingUserIds = new Set(existingUsers.map(u => u.id));
+                    const validMembers = claimedMembers.filter(m => existingUserIds.has(m.claimedByUserId!));
+                    
+                    if (validMembers.length > 0) {
+                        await tx.teamMember.createMany({
+                            data: validMembers.map(m => ({
+                                teamId: newTeam.id,
+                                userId: m.claimedByUserId!,
+                            }))
+                        });
+                    }
+                    
+                    // Log warning if some users don't exist
+                    if (validMembers.length < claimedMembers.length) {
+                        console.warn(`⚠️  Team ${teamRegistration.teamName}: ${claimedMembers.length - validMembers.length} member(s) skipped (user not found in database)`);
+                    }
                 }
             }
         });

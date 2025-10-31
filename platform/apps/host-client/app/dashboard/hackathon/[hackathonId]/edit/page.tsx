@@ -151,7 +151,7 @@ export default function EditHackathonPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
-          <Card className="border-border bg-card">
+          <Card className="border-2 border-accent/30 bg-card/50 backdrop-blur-sm hover:border-accent/50 transition-all">
             <CardHeader>
               <CardTitle>Manage Hackathon</CardTitle>
               <CardDescription>Editing: {hackathonData.name}</CardDescription>
