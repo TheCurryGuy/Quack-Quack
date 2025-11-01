@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { X, Users } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 interface MemberData {
   name: string
@@ -51,6 +52,7 @@ export default function TeamRegistrationWizard({
   onOpenChange: (open: boolean) => void
   onRegistrationComplete: (response: TeamRegistrationResponse) => void
 }) {
+  const router = useRouter()
   const [teamName, setTeamName] = useState("")
   const [members, setMembers] = useState<MemberData[]>([
     { name: "", email: "", githubUrl: "", portfolioUrl: "", college: "", year: new Date().getFullYear() },
@@ -88,6 +90,7 @@ export default function TeamRegistrationWizard({
         members: members,
       })
       onRegistrationComplete(response.data)
+      router.push('/dashboard')
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to register team.")
     } finally {

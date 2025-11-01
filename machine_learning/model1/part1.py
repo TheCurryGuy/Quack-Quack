@@ -29,8 +29,8 @@ def evaluate_candidate(name, skills):
     # ...existing code...
     # 2️⃣ Primary language dictionary remains the same
     primary_languages = {
-        "java": "a",
-        "c": "b",
+        "React": "a",
+        "Next.js": "b",
         "python": "c",
         "Javascript/Typescript": "d"
     }
