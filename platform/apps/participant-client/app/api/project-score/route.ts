@@ -22,14 +22,18 @@ export async function POST(req: NextRequest) {
         if (!name || !tech_stack_used) {
             return NextResponse.json({ message: 'Project name and tech stack are required.' }, { status: 400 });
         }
+
+        // Log what we're sending for debugging
+        console.log('Sending to AI API:', { team_name: name, tech_stack_used });
         
         // 3. --- IMPORTANT: REPLACE WITH YOUR PROJECT SCORING AI'S ACTUAL API ENDPOINT ---
         const externalApiUrl = 'http://localhost:8000/model3/predict';
         // ---
 
         // 4. Make the call to your external AI service
+        // Note: The FastAPI endpoint expects 'team_name', not 'name'
         const responseFromAi = await axios.post(externalApiUrl, {
-            name: name,
+            team_name: name,  // Changed from 'name' to 'team_name' to match FastAPI schema
             tech_stack_used: tech_stack_used,
         }, {
             headers: {

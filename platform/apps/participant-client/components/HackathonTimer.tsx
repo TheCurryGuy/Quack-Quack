@@ -40,7 +40,8 @@ export default function HackathonTimer({ status, startDate, actualStartTime, dur
         setTitle("Ends In")
         const endTime = new Date(actualStartTime).getTime() + durationHours * 60 * 60 * 1000
         const distance = endTime - now
-        setTimeLeft(distance > 0 ? formatTime(distance) : "Ending now!")
+        // Show countdown even if negative - hackathon is LIVE until host ends it
+        setTimeLeft(distance > 0 ? formatTime(distance) : "Time's up! Awaiting host to end...")
       } else {
         setTimeLeft("")
         setTitle("")
@@ -52,7 +53,8 @@ export default function HackathonTimer({ status, startDate, actualStartTime, dur
     return () => clearInterval(interval)
   }, [status, startDate, actualStartTime, durationHours])
 
-  if (status === "ENDED" || !title) {
+  // Only show "Event Completed" when status is actually ENDED
+  if (status === "ENDED") {
     return (
       <Card className="border-2 border-destructive/40 bg-destructive/10 backdrop-blur-sm">
         <CardHeader className="pb-4">
@@ -68,6 +70,10 @@ export default function HackathonTimer({ status, startDate, actualStartTime, dur
         </CardContent>
       </Card>
     )
+  }
+
+  if (!title) {
+    return null
   }
 
   return (

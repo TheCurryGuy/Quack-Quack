@@ -5,8 +5,9 @@ import { prismaClient } from 'db/client';
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ hackathonId: string }> }) {
     try {
         const { hackathonId } = await params;
+        // Get all teams with a rank (not null), not just top 3
         const winners = await prismaClient.team.findMany({
-            where: { hackathonId: hackathonId, rank: { in: [1, 2, 3] } },
+            where: { hackathonId: hackathonId, rank: { not: null } },
             select: { name: true, rank: true },
             orderBy: { rank: 'asc' }
         });

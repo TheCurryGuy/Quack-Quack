@@ -21,6 +21,8 @@ import {
 import { Calendar, Clock, Users, ShieldCheck, Loader2 } from "lucide-react"
 import IndividualRegistrationWizard from "@/components/IndividualRegistrationWizard"
 import TeamRegistrationWizard from "@/components/TeamRegistrationWizard"
+import WinnersCard from "@/components/WinnersCard"
+import HackathonTimer from "@/components/HackathonTimer"
 
 interface HackathonData {
   id: string
@@ -33,6 +35,7 @@ interface HackathonData {
   teamSize: number
   isRegistrationOpen: boolean
   status: "UPCOMING" | "LIVE" | "ENDED"
+  actualStartTime: string | null
 }
 
 interface TokenInfo {
@@ -75,6 +78,16 @@ export default function HackathonDetailPage() {
         }
       }
       fetchHackathon()
+
+      // Poll for hackathon status updates every 10 seconds
+      // This ensures the page updates when host ends the hackathon
+      const pollInterval = setInterval(() => {
+        if (hackathonId) {
+          fetchHackathon()
+        }
+      }, 10000) // Poll every 10 seconds
+
+      return () => clearInterval(pollInterval)
     }
   }, [hackathonId])
 
@@ -168,6 +181,14 @@ export default function HackathonDetailPage() {
 
         {/* Sidebar */}
         <div className="lg:col-span-1 space-y-6">
+          {/* Timer Card */}
+          <HackathonTimer
+            status={hackathon.status}
+            startDate={hackathon.startDate}
+            actualStartTime={hackathon.actualStartTime}
+            durationHours={hackathon.durationHours}
+          />
+
           {/* Info Card */}
           <Card className="bg-card/50 backdrop-blur-sm border-2 border-primary/30 hover:border-primary/50 transition-all">
             <CardHeader>
@@ -230,6 +251,9 @@ export default function HackathonDetailPage() {
               </CardContent>
             </Card>
           )}
+
+          {/* Winners Card - Show when hackathon has ended */}
+          {hackathon.status === "ENDED" && <WinnersCard hackathonId={hackathon.id} />}
         </div>
       </div>
 

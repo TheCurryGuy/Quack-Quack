@@ -5,6 +5,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import Step1Skills from "./Step1Skills"
 import Step2Details from "./Step2Details"
 import axios from "axios"
+import { useRouter } from "next/navigation"
+
+
 
 interface FormData {
   name: string
@@ -33,6 +36,7 @@ export default function IndividualRegistrationWizard({
   const [formData, setFormData] = useState<Partial<FormData>>({})
   const [scoreData, setScoreData] = useState<ScoreData | null>(null)
 
+  const route = useRouter()
   const handleFinish = async (finalData: FormData) => {
     try {
       await axios.post(`/api/hackathons/${hackathonId}/register-individual`, finalData)
@@ -61,6 +65,7 @@ export default function IndividualRegistrationWizard({
     setFormData({})
     setScoreData(null)
     onOpenChange(false)
+    route.push('/dashboard')
   }
 
   return (

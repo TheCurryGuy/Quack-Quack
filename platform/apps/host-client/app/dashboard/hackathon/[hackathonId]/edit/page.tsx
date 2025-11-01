@@ -286,9 +286,10 @@ export default function EditHackathonPage() {
         <RegistrationManagerV2 hackathonId={hackathonId as string} />
       </div>
 
-      {(hackathonData.status === "LIVE" && isHackathonOver) || hackathonData.status === "ENDED" ? (
+      {/* Winner Announcer - Visible when hackathon is LIVE or ENDED (not UPCOMING) */}
+      {hackathonData.status !== "UPCOMING" && (
         <WinnerAnnouncer hackathonId={hackathonId as string} onWinnersAnnounced={handleWinnersAnnounced} />
-      ) : null}
+      )}
     </main>
   )
 }

@@ -23,6 +23,14 @@ export default function MyHackathonsPage() {
       }
     }
     fetchMyHackathons()
+
+    // Poll for hackathon status updates every 15 seconds
+    // This ensures the status updates when host ends a hackathon
+    const pollInterval = setInterval(() => {
+      fetchMyHackathons()
+    }, 15000) // Poll every 15 seconds
+
+    return () => clearInterval(pollInterval)
   }, [])
 
   return (
