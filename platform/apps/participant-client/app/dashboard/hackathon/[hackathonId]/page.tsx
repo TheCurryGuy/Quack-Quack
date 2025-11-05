@@ -67,6 +67,16 @@ export default function ParticipantHackathonPage() {
       }
       fetchHackathon()
       fetchMyStatus()
+
+      // Poll for hackathon status updates every 10 seconds when LIVE
+      // This ensures the page updates when host ends the hackathon
+      const pollInterval = setInterval(() => {
+        if (hackathonId) {
+          fetchHackathon()
+        }
+      }, 10000) // Poll every 10 seconds
+
+      return () => clearInterval(pollInterval)
     }
   }, [hackathonId, fetchMyStatus])
 

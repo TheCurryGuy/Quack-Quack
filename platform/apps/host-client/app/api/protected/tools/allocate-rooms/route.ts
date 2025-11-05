@@ -22,14 +22,13 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ message: 'CSV file and all room details are required.' }, { status: 400 });
         }
 
-        // Re-package all the data into new form data to send to your external service.
+        // Re-package the file into form data, but send room details as query parameters
         const externalApiFormData = new FormData();
         externalApiFormData.append('file', file);
-        externalApiFormData.append('no_of_rooms_available', roomsAvailable);
-        externalApiFormData.append('each_room_capacity', roomCapacity);
         
         // --- IMPORTANT: REPLACE WITH YOUR ROOM ALLOCATION AI'S API ENDPOINT ---
-        const externalApiUrl = 'http://localhost:8000/model2/upload';
+        // The FastAPI endpoint expects no_of_rooms_available and each_room_capacity as query parameters
+        const externalApiUrl = `http://localhost:8000/model2/upload?no_of_rooms_available=${roomsAvailable}&each_room_capacity=${roomCapacity}`;
         // ---
 
         const responseFromAi = await axios.post(externalApiUrl, externalApiFormData, {

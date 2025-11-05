@@ -26,7 +26,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ hac
         }
         
         await prismaClient.$transaction(async (tx) => {
-            // 1. Mark the hackathon as ENDED
+            // 1. Mark the hackathon as ENDED when winners are announced
             await tx.hackathon.update({
                 where: { id: hackathonId },
                 data: { status: 'ENDED' }

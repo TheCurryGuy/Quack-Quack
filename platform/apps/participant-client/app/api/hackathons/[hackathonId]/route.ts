@@ -27,6 +27,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ hack
                 teamSize: true,
                 isRegistrationOpen: true,
                 status: true,
+                actualStartTime: true, // Need this for timer and status calculations
             }
         });
 
