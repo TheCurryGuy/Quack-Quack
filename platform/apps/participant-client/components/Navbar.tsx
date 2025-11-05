@@ -6,8 +6,14 @@ import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { LogOut } from "lucide-react"
 
+
 export default function Navbar() {
   const { data: session, status } = useSession()
+  
+
+  const funcCAl = () => {
+    signOut({ callbackUrl: 'http://localhost:3001/', redirect: true })
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl supports-backdrop-filter:bg-background/60">
@@ -41,7 +47,7 @@ export default function Navbar() {
                 <span className="text-sm font-semibold text-foreground">{session.user?.name}</span>
                 <span className="text-xs text-muted-foreground">{session.user?.email}</span>
               </div>
-              <Button onClick={() => signOut()} variant="outline" size="default" className="gap-2 transition-all">
+              <Button onClick={() => funcCAl()} variant="outline" size="default" className="gap-2 transition-all">
                 <LogOut className="h-4 w-4" />
                 Sign Out
               </Button>
