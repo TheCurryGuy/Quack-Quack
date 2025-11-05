@@ -30,6 +30,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   // and upload it directly to Vercel Blob.
   const blob = await put(uniqueFilename, request.body, {
     access: 'public', // This is CRUCIAL. It makes the uploaded images viewable by anyone on the web.
+    addRandomSuffix: true, // Adds a nonce to prevent overwrites and ensure unique filenames
   });
 
   // 5. 'put' returns a JSON object with the URL and other details. We send this back to the client.
