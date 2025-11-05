@@ -12,10 +12,7 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl supports-backdrop-filter:bg-background/60">
       <nav className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <Link
-          href="/"
-          className="flex items-center hover:opacity-80 transition-opacity"
-        >
+        <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
           <svg
             viewBox="0 0 24 24"
             width={24}
@@ -24,11 +21,11 @@ export default function Navbar() {
             xmlns="http://www.w3.org/2000/svg"
             className="mr-2"
           >
-            <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#FFFFFF" stroke="#FFFFFF" strokeWidth={1} />
-            <path d="M2 17L12 22L22 17" stroke="#FFFFFF" strokeWidth={1} />
-            <path d="M2 12L12 17L22 12" stroke="#FFFFFF" strokeWidth={1} />
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#7A584F" stroke="#7A584F" strokeWidth={1} />
+            <path d="M2 17L12 22L22 17" stroke="#7A584F" strokeWidth={1} />
+            <path d="M2 12L12 17L22 12" stroke="#7A584F" strokeWidth={1} />
           </svg>
-          <span className="font-bold text-2xl bg-linear-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
+          <span className="font-bold text-3xl bg-linear-to-r from-secondary via-accent to-primary bg-clip-text text-transparent">
             HACKVERSE
           </span>
         </Link>
@@ -44,21 +41,16 @@ export default function Navbar() {
                 <span className="text-sm font-semibold text-foreground">{session.user?.name}</span>
                 <span className="text-xs text-muted-foreground">{session.user?.email}</span>
               </div>
-              <Button 
-                onClick={() => signOut()} 
-                variant="outline" 
-                size="default" 
-                className="gap-2 border-border/60 hover:border-primary/50 hover:bg-primary/10 hover:text-primary transition-colors px-5 py-2.5 text-base font-medium"
-              >
+              <Button onClick={() => signOut()} variant="outline" size="default" className="gap-2 transition-all">
                 <LogOut className="h-4 w-4" />
                 Sign Out
               </Button>
             </div>
           ) : (
-            <Button 
-              onClick={() => signIn("github")} 
+            <Button
+              onClick={() => signIn("github")}
               size="default"
-              className="bg-primary text-primary-foreground font-semibold px-6 py-2.5 text-base"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold transition-all"
             >
               Sign in with GitHub
             </Button>
