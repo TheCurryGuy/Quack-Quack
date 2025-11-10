@@ -34,13 +34,28 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ message: 'This invite is for a different user.' }, { status: 403 });
         }
 
+        // Get the team registration to access hackathon ID
+        const teamRegistration = await prismaClient.teamRegistration.findUnique({
+            where: { id: pendingMember.teamRegistrationId },
+            include: { hackathon: true }
+        });
+
+        if (!teamRegistration) {
+            return NextResponse.json({ message: 'Team registration not found.' }, { status: 404 });
+        }
+
         // Link the logged-in user to this spot
         await prismaClient.pendingTeamMember.update({
             where: { id: pendingMember.id },
             data: { claimedByUserId: session.user.id },
         });
 
-        return NextResponse.json({ message: 'Successfully joined the team!' }, { status: 200 });
+        return NextResponse.json({ 
+            message: 'Successfully joined the team!',
+            teamName: teamRegistration.teamName,
+            hackathonId: teamRegistration.hackathonId,
+            hackathonName: teamRegistration.hackathon.name
+        }, { status: 200 });
 
     } catch (error) {
         console.error('Error joining team:', error);

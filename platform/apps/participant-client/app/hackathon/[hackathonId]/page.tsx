@@ -118,9 +118,12 @@ export default function HackathonDetailPage() {
       return
     }
     try {
-      await axios.post("/api/teams/join", { token: joinToken })
-      alert("Successfully joined team!")
+      const response = await axios.post("/api/teams/join", { token: joinToken })
+      const data = response.data
+      alert(`Successfully joined team "${data.teamName}" for ${data.hackathonName}!`)
       setJoinToken("")
+      // Redirect to the hackathon dashboard page
+      window.location.href = `/dashboard/hackathon/${data.hackathonId}`
     } catch (error) {
       alert(`Failed to join team: ${(error as any).response?.data?.message}`)
     }

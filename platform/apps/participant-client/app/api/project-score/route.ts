@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
         console.log('Sending to AI API:', { team_name: name, tech_stack_used });
         
         // 3. --- IMPORTANT: REPLACE WITH YOUR PROJECT SCORING AI'S ACTUAL API ENDPOINT ---
-        const externalApiUrl = 'http://localhost:8000/model3/predict';
+        const externalApiUrl = 'https://5dgt8wj7-8000.asse.devtunnels.ms/model3/predict';
         // ---
 
         // 4. Make the call to your external AI service

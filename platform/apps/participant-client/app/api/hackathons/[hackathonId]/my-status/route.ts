@@ -58,10 +58,39 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ hac
             // If no individual reg, check for a team registration
             const teamRegMember = await prismaClient.pendingTeamMember.findFirst({
                 where: { claimedByUserId: userId, teamRegistration: { hackathonId: hackathonId } },
-                include: { teamRegistration: true }
+                include: { 
+                    teamRegistration: {
+                        include: {
+                            pendingMembers: {
+                                include: {
+                                    claimedByUser: {
+                                        select: { name: true, image: true }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             });
             if (teamRegMember) {
                 registrationStatus = teamRegMember.teamRegistration.status;
+                
+                // Show pending team details even when status is PENDING
+                // This allows members to see who has joined the team
+                if (registrationStatus === 'PENDING') {
+                    teamDetails = {
+                        id: teamRegMember.teamRegistration.id,
+                        name: teamRegMember.teamRegistration.teamName,
+                        bio: null,
+                        skills: null,
+                        members: teamRegMember.teamRegistration.pendingMembers
+                            .filter(m => m.claimedByUserId) // Only show members who have claimed their spot
+                            .map(m => ({
+                                name: m.claimedByUser?.name || m.name,
+                                image: m.claimedByUser?.image || null
+                            }))
+                    };
+                }
             }
         }
         

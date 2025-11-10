@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
         }
         
         // 3. --- IMPORTANT: REPLACE WITH YOUR AI MODEL'S ACTUAL API ENDPOINT ---
-        const externalApiUrl = 'http://localhost:8000/model1/evaluate';
+        const externalApiUrl = 'https://5dgt8wj7-8000.asse.devtunnels.ms/model1/evaluate';
         // ---
 
         // 4. Make the call to your external AI service

@@ -90,7 +90,6 @@ export default function TeamRegistrationWizard({
         members: members,
       })
       onRegistrationComplete(response.data)
-      router.push('/dashboard')
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to register team.")
     } finally {

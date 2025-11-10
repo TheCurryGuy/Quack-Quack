@@ -45,6 +45,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ regI
         }
         
         // Use a transaction for the database operations
+        let teamCreationResult: { teamId?: string; membersAdded?: number; teamName?: string } = {};
+        
         await prismaClient.$transaction(async (tx) => {
             // Double-check status inside transaction to prevent race conditions
             const currentReg = await tx.teamRegistration.findUnique({
@@ -63,40 +65,73 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ regI
             
             // If APPROVED, create the official team and link the claimed members
             if (status === 'APPROVED') {
+                console.log(`✅ Approving team: ${teamRegistration.teamName}`);
+                
                 const newTeam = await tx.team.create({
                     data: {
                         name: teamRegistration.teamName,
                         hackathonId: teamRegistration.hackathonId,
                     }
                 });
+                console.log(`✅ Created Team in database: ID=${newTeam.id}, Name=${newTeam.name}`);
+                
+                teamCreationResult.teamId = newTeam.id;
+                teamCreationResult.teamName = newTeam.name;
 
                 // Find members who have already claimed their spot via the token
                 const claimedMembers = teamRegistration.pendingMembers.filter(m => m.claimedByUserId !== null);
+                const totalMembers = teamRegistration.pendingMembers.length;
+                
+                console.log(`📊 Team ${teamRegistration.teamName}: ${claimedMembers.length}/${totalMembers} members claimed their spots`);
 
-                if (claimedMembers.length > 0) {
+                if (claimedMembers.length === 0) {
+                    console.warn(`⚠️  Team ${teamRegistration.teamName}: No members have claimed their spots yet!`);
+                    teamCreationResult.membersAdded = 0;
+                } else {
                     // Verify all claimed user IDs exist in the User table
                     const userIds = claimedMembers.map(m => m.claimedByUserId!);
                     const existingUsers = await tx.user.findMany({
                         where: { id: { in: userIds } },
-                        select: { id: true }
+                        select: { id: true, name: true, email: true }
                     });
                     
                     const existingUserIds = new Set(existingUsers.map(u => u.id));
                     const validMembers = claimedMembers.filter(m => existingUserIds.has(m.claimedByUserId!));
                     
                     if (validMembers.length > 0) {
-                        await tx.teamMember.createMany({
+                        // Create TeamMember records for all valid members
+                        const teamMembers = await tx.teamMember.createMany({
                             data: validMembers.map(m => ({
                                 teamId: newTeam.id,
                                 userId: m.claimedByUserId!,
-                            }))
+                            })),
+                            skipDuplicates: true // Prevent errors if somehow duplicates exist
+                        });
+                        
+                        teamCreationResult.membersAdded = teamMembers.count;
+                        
+                        console.log(`✅ Successfully added ${teamMembers.count} members to Team ${teamRegistration.teamName}:`);
+                        existingUsers.forEach(user => {
+                            console.log(`   - ${user.name} (${user.email})`);
                         });
                     }
                     
                     // Log warning if some users don't exist
                     if (validMembers.length < claimedMembers.length) {
-                        console.warn(`⚠️  Team ${teamRegistration.teamName}: ${claimedMembers.length - validMembers.length} member(s) skipped (user not found in database)`);
+                        const invalidCount = claimedMembers.length - validMembers.length;
+                        console.error(`❌ Team ${teamRegistration.teamName}: ${invalidCount} member(s) skipped (user not found in database)`);
                     }
+                    
+                    // Verify the final team composition
+                    const finalTeamMembers = await tx.teamMember.findMany({
+                        where: { teamId: newTeam.id },
+                        include: { user: { select: { name: true, email: true } } }
+                    });
+                    
+                    console.log(`✅ FINAL VERIFICATION - Team ${teamRegistration.teamName} has ${finalTeamMembers.length} members in the Team table:`);
+                    finalTeamMembers.forEach(tm => {
+                        console.log(`   ✓ ${tm.user.name} (${tm.user.email})`);
+                    });
                 }
             }
         });
@@ -114,7 +149,14 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ regI
             html: emailTemplate.html,
         });
 
-        return NextResponse.json({ message: `Team registration ${status.toLowerCase()} and notifications sent.` }, { status: 200 });
+        const responseMessage = status === 'APPROVED' && teamCreationResult.teamId
+            ? `Team "${teamCreationResult.teamName}" approved! Created with ${teamCreationResult.membersAdded || 0} members in the Team table. Notifications sent.`
+            : `Team registration ${status.toLowerCase()} and notifications sent.`;
+
+        return NextResponse.json({ 
+            message: responseMessage,
+            teamCreated: teamCreationResult
+        }, { status: 200 });
         
     } catch (error) {
         console.error('Error updating team registration:', error);

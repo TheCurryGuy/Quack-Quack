@@ -70,15 +70,21 @@ export default function MyTeamCard({
               Team Members
             </h4>
             <div className="space-y-2">
-              {team.members.map((member, index) => (
-                <div key={index} className="flex items-center gap-4 p-3 rounded-xl hover:bg-muted/30 transition-colors border border-border/30">
-                  <Avatar className="h-10 w-10 shrink-0 border-2 border-border/60">
-                    <AvatarImage src={member.image || ""} alt={member.name || "Member"} />
-                    <AvatarFallback className="text-sm bg-primary/10 text-primary font-semibold">{member.name?.charAt(0) || "M"}</AvatarFallback>
-                  </Avatar>
-                  <span className="text-base font-semibold text-foreground truncate">{member.name}</span>
+              {team.members.length > 0 ? (
+                team.members.map((member, index) => (
+                  <div key={index} className="flex items-center gap-4 p-3 rounded-xl hover:bg-muted/30 transition-colors border border-border/30">
+                    <Avatar className="h-10 w-10 shrink-0 border-2 border-border/60">
+                      <AvatarImage src={member.image || ""} alt={member.name || "Member"} />
+                      <AvatarFallback className="text-sm bg-primary/10 text-primary font-semibold">{member.name?.charAt(0) || "M"}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-base font-semibold text-foreground truncate">{member.name}</span>
+                  </div>
+                ))
+              ) : (
+                <div className="p-4 bg-muted/30 rounded-lg border border-border/50 text-center">
+                  <p className="text-sm text-muted-foreground">No members have joined yet</p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </CardContent>
